@@ -1,0 +1,15 @@
+[package]
+name = "simple"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+anyhow = "1.0.97"
+pointer-events.workspace = true
+
+[lints]
+workspace = true
