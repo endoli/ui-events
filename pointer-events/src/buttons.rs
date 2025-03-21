@@ -17,7 +17,8 @@ pub enum PointerButton {
     X1,
     /// X2 (forward) Mouse.
     X2,
-    // TODO: Add Pen Eraser
+    /// Pen erase button.
+    PenEraser,
     /// Other mouse button. This isn't fleshed out yet.
     Other,
 }
@@ -34,9 +35,9 @@ fn button_bit(button: PointerButton) -> u8 {
         PointerButton::Auxiliary => 0b100,
         PointerButton::X1 => 0b1000,
         PointerButton::X2 => 0b10000,
-        // TODO: Add Pen Eraser
+        PointerButton::PenEraser => 32,
         // TODO: When we properly do `Other`, this changes
-        PointerButton::Other => 0b100000,
+        PointerButton::Other => 0b1000000,
     }
 }
 
