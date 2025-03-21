@@ -53,6 +53,7 @@ impl Default for ContactGeometry {
 
 // TODO: `auxclick`, `click`, `contextmenu`, 'dblclick' from UIEvents?
 
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum PointerEventType {
     PointerOver,
