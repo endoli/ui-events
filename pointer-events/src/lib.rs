@@ -29,7 +29,10 @@ use alloc::string::String;
 use alloc::vec::Vec;
 
 mod buttons;
+mod modifiers;
+
 pub use buttons::{PointerButton, PointerButtons};
+pub use modifiers::Modifiers;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct PointerId(i32);
@@ -95,11 +98,7 @@ pub struct PointerEvent {
     pub client_y: i32,
     // TODO: Do layer_x, layer_y as well?
     pub pointer_id: PointerId,
-    // TODO: Replace with modifiers state? But `keyboard_types` is overkill for a bitfield and doesn't do `no_std` anyway.
-    pub ctrl_key: bool,
-    pub shift_key: bool,
-    pub alt_key: bool,
-    pub meta_key: bool,
+    pub modifiers: Modifiers,
     pub button: PointerButton,
     pub buttons: PointerButtons,
     // TODO: What to do about related_target?
