@@ -21,9 +21,15 @@
 // TODO: We could use the `dpi` crate to distinguish between logical and physical positions
 // and sizes, but it isn't yet `no_std` compatible.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 mod buttons;
+mod modifiers;
 
 pub use buttons::{PointerButton, PointerButtons};
+pub use modifiers::Modifiers;
 
 /// A unique identifier for the pointing device.
 // TODO: Is this actually available on all platforms, or should
@@ -90,6 +96,42 @@ pub enum PointerType {
     Mouse,
     Pen,
     Touch,
+}
+
+#[derive(Clone, Debug)]
+#[expect(missing_docs, reason = "fill in later")]
+pub struct PointerEvent {
+    pub timestamp: u64,
+    pub count: i32,
+    // TODO: Use dpi crate for these?
+    // TODO: These are i32 in the browser due to backward compat with `MouseEvent` however in CSSOM, they
+    // are `double`
+    pub screen_x: i32,
+    pub screen_y: i32,
+    pub client_x: i32,
+    pub client_y: i32,
+    // TODO: Do layer_x, layer_y as well?
+    pub pointer_id: PointerId,
+    pub modifiers: Modifiers,
+    pub button: PointerButton,
+    pub buttons: PointerButtons,
+    // TODO: What to do about related_target?
+    /// This corresponds to the `width` and `height` fields in the `PointerEvent` specification.
+    pub contact_geometry: ContactGeometry,
+    pub pressure: f32,
+    pub tangential_pressure: f32,
+    // TODO: Make these into a more Rust-like structure as well?
+    // Handle the specified conversion between tilt and altitude/azimuth as well.
+    pub tilt_x: i32,
+    pub tilt_y: i32,
+    pub twist: i32,
+    pub altitude_angle: f64,
+    pub azimuth_angle: f64,
+    pub pointer_type: PointerType,
+    pub is_primary: bool,
+    pub persistent_device_id: i32,
+    pub coalesced_events: Option<Vec<PointerEvent>>,
+    pub predicted_events: Option<Vec<PointerEvent>>,
 }
 
 #[cfg(test)]
