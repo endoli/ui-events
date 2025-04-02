@@ -14,7 +14,7 @@ edition = "2021"
 # and with the MSRV in the `Unreleased` section of CHANGELOG.md.
 rust-version = "1.81"
 license = "Apache-2.0 OR MIT"
-repository = "https://github.com/linebender/pointer-events"
+repository = "https://github.com/endoli/pointer-events"
 
 [workspace.lints]
 rust.unsafe_code = "deny"

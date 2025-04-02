@@ -5,9 +5,9 @@
 A library for working with pointer events.
 
 [![Linebender Zulip, #general channel](https://img.shields.io/badge/Linebender-%23general-blue?logo=Zulip)](https://xi.zulipchat.com/#narrow/channel/147921-general)
-[![dependency status](https://deps.rs/repo/github/linebender/pointer-events/status.svg)](https://deps.rs/repo/github/linebender/pointer-events)
+[![dependency status](https://deps.rs/repo/github/endoli/pointer-events/status.svg)](https://deps.rs/repo/github/endoli/pointer-events)
 [![Apache 2.0 or MIT license.](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg)](#license)
-[![Build status](https://github.com/linebender/pointer-events/workflows/CI/badge.svg)](https://github.com/linebender/pointer-events/actions)
+[![Build status](https://github.com/endoli/pointer-events/workflows/CI/badge.svg)](https://github.com/endoli/pointer-events/actions)
 [![Crates.io](https://img.shields.io/crates/v/pointer-events.svg)](https://crates.io/crates/pointer-events)
 [![Docs](https://docs.rs/pointer-events/badge.svg)](https://docs.rs/pointer-events)
 

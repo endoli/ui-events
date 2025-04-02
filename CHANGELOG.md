@@ -17,6 +17,6 @@ This release has an [MSRV][] of 1.81.
 
 This is the initial release.
 
-[Unreleased]: https://github.com/linebender/pointer-events/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/endoli/pointer-events/compare/v0.1.0...HEAD
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
