@@ -8,7 +8,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 # Changelog
 
-The latest published Pointer Events release is [0.X.Y](#0XY-2025-01-01) which was released on 2025-01-01.
+The latest published Input Types release is [0.X.Y](#0XY-2025-01-01) which was released on 2025-01-01.
 You can find its changes [documented below](#0XY-2025-01-01).
 
 ## [Unreleased]
@@ -17,6 +17,6 @@ This release has an [MSRV][] of 1.73.
 
 This is the initial release.
 
-[Unreleased]: https://github.com/endoli/pointer-events/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/endoli/input-types/compare/v0.1.0...HEAD
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
