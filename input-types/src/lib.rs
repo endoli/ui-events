@@ -1,7 +1,7 @@
-// Copyright 2025 the Pointer Events Authors
+// Copyright 2025 the Input Types Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! Pointer Events is a Rust crate which ...
+//! Input Types is a Rust crate which ...
 //!
 //! ## Features
 //!

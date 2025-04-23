@@ -1,10 +1,10 @@
 [package]
-name = "pointer-events"
+name = "input-types"
 version.workspace = true
 license.workspace = true
 edition.workspace = true
-description = "A vocabulary crate for working with pointer events."
-keywords = ["ui", "pointer", "events"]
+description = "A vocabulary crate for working with input types events."
+keywords = ["ui", "input", "pointer", "events"]
 categories = ["graphics", "text"]
 repository.workspace = true
 rust-version.workspace = true

@@ -1,32 +1,32 @@
 <div align="center">
 
-# Pointer Events
+# Input Types
 
-A library for working with pointer events.
+A library for working with input types and events.
 
 [![Linebender Zulip, #general channel](https://img.shields.io/badge/Linebender-%23general-blue?logo=Zulip)](https://xi.zulipchat.com/#narrow/channel/147921-general)
-[![dependency status](https://deps.rs/repo/github/endoli/pointer-events/status.svg)](https://deps.rs/repo/github/endoli/pointer-events)
+[![dependency status](https://deps.rs/repo/github/endoli/input-types/status.svg)](https://deps.rs/repo/github/endoli/input-types)
 [![Apache 2.0 or MIT license.](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg)](#license)
-[![Build status](https://github.com/endoli/pointer-events/workflows/CI/badge.svg)](https://github.com/endoli/pointer-events/actions)
-[![Crates.io](https://img.shields.io/crates/v/pointer-events.svg)](https://crates.io/crates/pointer-events)
-[![Docs](https://docs.rs/pointer-events/badge.svg)](https://docs.rs/pointer-events)
+[![Build status](https://github.com/endoli/input-types/workflows/CI/badge.svg)](https://github.com/endoli/input-types/actions)
+[![Crates.io](https://img.shields.io/crates/v/input-types.svg)](https://crates.io/crates/input-types)
+[![Docs](https://docs.rs/input-types/badge.svg)](https://docs.rs/input-types)
 
 </div>
 
-The Pointer Events library provides functionality for working with pointer events.
+The Input Types library provides functionality for working with input types and events.
 This library follows and is inspired by the relevant W3C specifications.
 
 ## Minimum supported Rust Version (MSRV)
 
-This version of Pointer Events has been verified to compile with **Rust 1.73** and later.
+This version of Input Types has been verified to compile with **Rust 1.73** and later.
 
-Future versions of Pointer Events might increase the Rust version requirement.
+Future versions of Input Types might increase the Rust version requirement.
 It will not be treated as a breaking change and as such can even happen with small patch releases.
 
 <details>
 <summary>Click here if compiling fails.</summary>
 
-As time has passed, some of Pointer Events' dependencies could have released versions with a higher Rust requirement.
+As time has passed, some of Input Types' dependencies could have released versions with a higher Rust requirement.
 If you encounter a compilation issue due to a dependency and don't want to upgrade your Rust toolchain, then you could downgrade the dependency.
 
 ```sh
@@ -39,7 +39,7 @@ cargo update -p package_name --precise 0.1.1
 
 [![Linebender Zulip](https://img.shields.io/badge/Xi%20Zulip-%23general-blue?logo=Zulip)](https://xi.zulipchat.com/#narrow/channel/147921-general)
 
-Discussion of Pointer Events development happens in the [Linebender Zulip](https://xi.zulipchat.com/), specifically the [#general channel](https://xi.zulipchat.com/#narrow/channel/147921-general).
+Discussion of Input Types development happens in the [Linebender Zulip](https://xi.zulipchat.com/), specifically the [#general channel](https://xi.zulipchat.com/#narrow/channel/147921-general).
 All public content can be read without logging in.
 
 ## License
