@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["input-types", "examples/simple"]
+members = ["ui-events", "examples/simple"]
 
 [workspace.package]
-# Input Types version, also used by other packages which want to mimic Input Types' version.
+# UI Events version, also used by other packages which want to mimic UI Events' version.
 #
 # NOTE: When bumping this, remember to also bump the aforementioned other packages'
 #       version in the dependencies section at the bottom of this file.
@@ -14,7 +14,7 @@ edition = "2021"
 # and with the MSRV in the `Unreleased` section of CHANGELOG.md.
 rust-version = "1.73"
 license = "Apache-2.0 OR MIT"
-repository = "https://github.com/endoli/input-types"
+repository = "https://github.com/endoli/ui-events"
 
 [workspace.lints]
 rust.unsafe_code = "deny"
@@ -65,4 +65,4 @@ clippy.wildcard_dependencies = "warn"
 # END LINEBENDER LINT SET
 
 [workspace.dependencies]
-input-types = { version = "0.1.0", path = "input-types", default-features = false }
+ui-events = { version = "0.1.0", path = "ui-events", default-features = false }

@@ -1,9 +1,9 @@
 [package]
-name = "input-types"
+name = "ui-events"
 version.workspace = true
 license.workspace = true
 edition.workspace = true
-description = "A vocabulary crate for working with input types events."
+description = "A crate for working with UI events and input types."
 keywords = ["ui", "input", "pointer", "events"]
 categories = ["graphics", "text"]
 repository.workspace = true

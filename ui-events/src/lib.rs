@@ -1,7 +1,7 @@
-// Copyright 2025 the Input Types Authors
+// Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! Input Types is a Rust crate which ...
+//! UI Events is a Rust crate which ...
 //!
 //! ## Features
 //!

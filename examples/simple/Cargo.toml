@@ -9,7 +9,7 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.97"
-input-types.workspace = true
+ui-events.workspace = true
 
 [lints]
 workspace = true
