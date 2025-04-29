@@ -18,4 +18,5 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![no_std]
 
+pub mod keyboard;
 pub mod pointer;
