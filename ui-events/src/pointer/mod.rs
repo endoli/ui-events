@@ -12,6 +12,8 @@ use alloc::vec::Vec;
 
 use core::num::NonZeroU64;
 
+use keyboard_types::Modifiers;
+
 /// A unique identifier for the pointer.
 ///
 /// PointerId(1) is reserved for the primary pointer.
@@ -142,6 +144,8 @@ pub struct PointerState {
     pub y: f32,
     /// Pressed buttons.
     pub buttons: PointerButtons,
+    /// Modifiers state.
+    pub modifiers: Modifiers,
     /// Contact geometry.
     pub contact_geometry: ContactGeometry,
     /// Orientation.
@@ -167,6 +171,7 @@ impl Default for PointerState {
             x: 0.0,
             y: 0.0,
             buttons: PointerButtons::default(),
+            modifiers: Modifiers::default(),
             contact_geometry: ContactGeometry::default(),
             orientation: PointerOrientation::default(),
             // No buttons pressed, therefore no pressure.
