@@ -21,6 +21,12 @@ pub struct PointerId(NonZeroU64);
 impl PointerId {
     /// The id of the primary pointer.
     pub const PRIMARY: Self = Self(NonZeroU64::MIN);
+
+    /// Make a new `PointerId` from a `u64`.
+    #[inline(always)]
+    pub fn new(n: u64) -> Option<Self> {
+        NonZeroU64::new(n).map(PointerId)
+    }
 }
 
 /// An identifier for the pointing device that is stable across the session.
@@ -28,6 +34,14 @@ impl PointerId {
 /// PointerId(1) is reserved for the primary pointer.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct PersistentDeviceId(NonZeroU64);
+
+impl PersistentDeviceId {
+    /// Make a new `PersistentDeviceId` from a `u64`.
+    #[inline(always)]
+    pub fn new(n: u64) -> Option<Self> {
+        NonZeroU64::new(n).map(PersistentDeviceId)
+    }
+}
 
 /// The type of device that has generated a pointer event.
 #[non_exhaustive]
