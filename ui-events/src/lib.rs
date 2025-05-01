@@ -20,3 +20,7 @@
 
 pub mod keyboard;
 pub mod pointer;
+
+mod scroll;
+
+pub use scroll::ScrollDelta;
