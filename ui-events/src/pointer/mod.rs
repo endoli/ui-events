@@ -146,6 +146,8 @@ pub struct PointerState {
     pub buttons: PointerButtons,
     /// Modifiers state.
     pub modifiers: Modifiers,
+    /// Click or tap count associated with the pointer.
+    pub count: u8,
     /// Contact geometry.
     pub contact_geometry: ContactGeometry,
     /// Orientation.
@@ -172,6 +174,7 @@ impl Default for PointerState {
             y: 0.0,
             buttons: PointerButtons::default(),
             modifiers: Modifiers::default(),
+            count: 0,
             contact_geometry: ContactGeometry::default(),
             orientation: PointerOrientation::default(),
             // No buttons pressed, therefore no pressure.
