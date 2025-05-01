@@ -20,7 +20,6 @@ Full documentation at https://github.com/orium/cargo-rdme -->
 
 <!-- Intra-doc links used in lib.rs should be evaluated here. 
 See https://linebender.org/blog/doc-include/ for related discussion. -->
-[libm]: https://crates.io/crates/libm
 <!-- cargo-rdme start -->
 
 UI Events is a Rust crate which ...
