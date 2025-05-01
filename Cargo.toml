@@ -7,7 +7,7 @@ members = ["ui-events", "examples/simple"]
 #
 # NOTE: When bumping this, remember to also bump the aforementioned other packages'
 #       version in the dependencies section at the bottom of this file.
-version = "0.1.0"
+version = "0.0.1"
 
 edition = "2021"
 # Keep in sync with RUST_MIN_VER in .github/workflows/ci.yml, with the relevant README.md files
@@ -65,4 +65,4 @@ clippy.wildcard_dependencies = "warn"
 # END LINEBENDER LINT SET
 
 [workspace.dependencies]
-ui-events = { version = "0.1.0", path = "ui-events", default-features = false }
+ui-events = { version = "0.0.1", path = "ui-events", default-features = false }

@@ -5,7 +5,7 @@ license.workspace = true
 edition.workspace = true
 description = "A crate for working with UI events and input types."
 keywords = ["ui", "input", "pointer", "events"]
-categories = ["graphics", "text"]
+categories = ["graphics", "gui"]
 repository.workspace = true
 rust-version.workspace = true
 

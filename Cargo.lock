@@ -64,7 +64,7 @@ dependencies = [
 
 [[package]]
 name = "simple"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anyhow",
  "ui-events",
@@ -83,7 +83,7 @@ dependencies = [
 
 [[package]]
 name = "ui-events"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "keyboard-types",
 ]
