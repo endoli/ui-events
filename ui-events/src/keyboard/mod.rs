@@ -4,3 +4,6 @@
 //! Keyboard Types
 
 pub use keyboard_types::*;
+
+#[cfg(target_os = "android")]
+pub mod android;
