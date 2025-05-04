@@ -13,7 +13,10 @@ env:
   RUST_MIN_NO_STD_VER: "1.81"
   # List of packages that will be checked with the minimum supported Rust version.
   # This should be limited to packages that are intended for publishing.
-  RUST_MIN_VER_PKGS: "-p ui-events"
+  RUST_MIN_VER_PKGS: "-p ui-events -p ui-events-winit"
+  # List of packages that will be checked for `no_std` builds.
+  # This should be limited to packages that are intended for publishing.
+  RUST_NO_STD_PKGS: "-p ui-events"
   # List of features that depend on the standard library and will be excluded from no_std checks.
   FEATURES_DEPENDING_ON_STD: "std,default"
 
@@ -100,10 +103,15 @@ jobs:
         with:
           tool: cargo-rdme
 
-      - name: cargo rdme
+      - name: cargo rdme (ui-events)
         # Ideally, we'd set heading-base-level=0 in the config file for cargo rdme, but that only
         # supports being placed at the top level, which we want to avoid cluttering.
         run: cargo rdme --workspace-project=ui-events --heading-base-level=0 --check
+
+      - name: cargo rdme (ui-events-winit)
+        # Ideally, we'd set heading-base-level=0 in the config file for cargo rdme, but that only
+        # supports being placed at the top level, which we want to avoid cluttering.
+        run: cargo rdme --workspace-project=ui-events-winit --heading-base-level=0 --check
 
   clippy-stable:
     name: cargo clippy
@@ -132,7 +140,7 @@ jobs:
           save-if: ${{ github.event_name != 'merge_group' }}
 
       - name: cargo clippy (no_std)
-        run: cargo hack clippy ${{ env.RUST_MIN_VER_PKGS }} --locked --optional-deps --each-feature --exclude-features ${{ env.FEATURES_DEPENDING_ON_STD }} --target x86_64-unknown-none -- -D warnings
+        run: cargo hack clippy ${{ env.RUST_NO_STD_PKGS }} --locked --optional-deps --each-feature --exclude-features ${{ env.FEATURES_DEPENDING_ON_STD }} --target x86_64-unknown-none -- -D warnings
 
       - name: cargo clippy
         run: cargo hack clippy --workspace --locked --optional-deps --each-feature --ignore-unknown-features --features std -- -D warnings
@@ -274,7 +282,7 @@ jobs:
           save-if: ${{ github.event_name != 'merge_group' }}
 
       - name: cargo check (no_std)
-        run: cargo hack check ${{ env.RUST_MIN_VER_PKGS }} --locked --optional-deps --each-feature --exclude-features ${{ env.FEATURES_DEPENDING_ON_STD }} --target x86_64-unknown-none
+        run: cargo hack check ${{ env.RUST_NO_STD_PKGS }} --locked --optional-deps --each-feature --exclude-features ${{ env.FEATURES_DEPENDING_ON_STD }} --target x86_64-unknown-none
 
   check-msrv-wasm:
     name: cargo check (msrv) (wasm32)
