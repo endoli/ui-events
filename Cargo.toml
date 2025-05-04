@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["ui-events", "examples/simple"]
+members = ["ui-events", "ui-events-winit", "examples/simple"]
 
 [workspace.package]
 # UI Events version, also used by other packages which want to mimic UI Events' version.
