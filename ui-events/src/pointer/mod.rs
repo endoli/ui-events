@@ -14,6 +14,8 @@ use core::num::NonZeroU64;
 
 use keyboard_types::Modifiers;
 
+use crate::ScrollDelta;
+
 /// A unique identifier for the pointer.
 ///
 /// PointerId(1) is reserved for the primary pointer.
@@ -203,4 +205,52 @@ pub struct PointerUpdate {
     /// Some platforms provide predicted states directly,
     /// and you may choose to add your own predictor.
     pub predicted: Vec<PointerState>,
+}
+
+/// A standard `PointerEvent`.
+///
+/// This is intentionally limited to standard pointer events,
+/// and it is expected that applications and frameworks that
+/// support more event types will use this as a base and add
+/// what they need in a conversion.
+#[derive(Clone, Debug)]
+pub enum PointerEvent {
+    /// A [`PointerButton`] was pressed.
+    Down {
+        /// The [`PointerButton`] that was pressed..
+        button: Option<PointerButton>,
+        /// Identity of the pointer.
+        pointer: PointerInfo,
+        /// The state of the pointer (i.e. position, pressure, etc.).
+        state: PointerState,
+    },
+    /// A [`PointerButton`] was released.
+    Up {
+        /// The [`PointerButton`] that was released.
+        button: Option<PointerButton>,
+        /// Identity of the pointer.
+        pointer: PointerInfo,
+        /// The state of the pointer (i.e. position, pressure, etc.).
+        state: PointerState,
+    },
+    /// Pointer moved.
+    Move(PointerUpdate),
+    /// Pointer motion was cancelled.
+    ///
+    /// Usually this is a touch which was taken over somewhere else.
+    /// You should try to undo the effect of the gesture when you receive this.
+    Cancel(PointerInfo),
+    /// Pointer entered the area that receives this event.
+    Enter(PointerInfo),
+    /// Pointer left the area that receives these events.
+    Leave(PointerInfo),
+    /// A scroll was requested at the pointer location.
+    ///
+    /// Usually this is caused by a mouse wheel or a touchpad.
+    Scroll {
+        /// Identity of the pointer.
+        pointer: PointerInfo,
+        /// The delta of the scroll.
+        delta: ScrollDelta,
+    },
 }
