@@ -1341,7 +1341,7 @@ pub const KEYCODE_F23: i32 = 336;
 /// F24 key.
 pub const KEYCODE_F24: i32 = 337;
 
-use super::{Code, NamedKey};
+use super::{Code, Location, NamedKey};
 
 /// Translates an Android keycode to its closest equivalent `Code`.
 pub fn keycode_to_code(keycode: i32) -> Code {
@@ -1697,5 +1697,19 @@ pub fn keycode_to_named_key(keycode: i32) -> NamedKey {
         KEYCODE_PAIRING => NamedKey::Pairing,
 
         _ => NamedKey::Unidentified,
+    }
+}
+
+/// Translates an Android keycode to its corresponding `Location`.
+pub fn keycode_to_location(keycode: i32) -> Location {
+    match keycode {
+        KEYCODE_SHIFT_LEFT | KEYCODE_CTRL_LEFT | KEYCODE_ALT_LEFT | KEYCODE_META_LEFT => {
+            Location::Left
+        }
+        KEYCODE_SHIFT_RIGHT | KEYCODE_CTRL_RIGHT | KEYCODE_ALT_RIGHT | KEYCODE_META_RIGHT => {
+            Location::Right
+        }
+        KEYCODE_NUMPAD_0..=KEYCODE_NUMPAD_RIGHT_PAREN => Location::Numpad,
+        _ => Location::Standard,
     }
 }
