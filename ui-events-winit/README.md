@@ -18,14 +18,17 @@ To edit the following section, update it in lib.rs, then run:
 cargo rdme --workspace-project=ui-events --heading-base-level=0
 Full documentation at https://github.com/orium/cargo-rdme -->
 
-<!-- Intra-doc links used in lib.rs should be evaluated here. 
+<!-- Intra-doc links used in lib.rs should be evaluated here.
 See https://linebender.org/blog/doc-include/ for related discussion. -->
 [`ui-events`]: https://crates.io/crates/ui-events
 [`winit`]: https://crates.io/crates/winit
+[`WindowEventReducer`]: https://docs.rs/ui-events-winit/latest/ui_events_winit/struct.WindowEventReducer.html
 <!-- cargo-rdme start -->
 
 This crate provides an adapter between [`winit`] events and
 [`ui-events`].
+
+The primary entry point is [`WindowEventReducer`].
 
 <!-- cargo-rdme end -->
 
