@@ -109,9 +109,10 @@ jobs:
         run: cargo rdme --workspace-project=ui-events --heading-base-level=0 --check
 
       - name: cargo rdme (ui-events-winit)
-        # Ideally, we'd set heading-base-level=0 in the config file for cargo rdme, but that only
-        # supports being placed at the top level, which we want to avoid cluttering.
         run: cargo rdme --workspace-project=ui-events-winit --heading-base-level=0 --check
+
+      - name: cargo rdme (ui-theme)
+        run: cargo rdme --workspace-project=ui-theme --heading-base-level=0 --check
 
   clippy-stable:
     name: cargo clippy
