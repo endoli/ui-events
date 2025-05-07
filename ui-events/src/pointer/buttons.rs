@@ -119,6 +119,7 @@ impl PointerButtons {
     }
 
     /// Adds all the `buttons` to the set.
+    #[inline]
     pub fn extend(&mut self, buttons: Self) {
         self.0 |= buttons.0;
     }
