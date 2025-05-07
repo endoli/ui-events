@@ -1,7 +1,7 @@
 // Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-/// An indicator of which pointer button was pressed.
+/// Describes a button of a pointer input device, such as a mouse or stylus pen.
 ///
 /// B7..B32 exist for the purpose of supporting pointer devices with
 /// large numbers of buttons.
@@ -129,7 +129,7 @@ impl PointerButtons {
         self.0 = 0;
     }
 
-    /// Count the number of pressed buttons in the set.
+    /// Count the number of buttons in the set.
     #[inline]
     pub fn count(self) -> u32 {
         self.0.count_ones()
