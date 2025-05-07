@@ -96,8 +96,7 @@ impl WindowEventReducer {
                 PointerEvent::Leave(PRIMARY_MOUSE),
             )),
             WindowEvent::CursorMoved { position, .. } => {
-                self.primary_state.x = position.x as f32;
-                self.primary_state.y = position.y as f32;
+                self.primary_state.position = *position;
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
                     PointerEvent::Move(PointerUpdate {
@@ -161,8 +160,7 @@ impl WindowEventReducer {
 
                 let state = PointerState {
                     time,
-                    x: location.x as f32,
-                    y: location.y as f32,
+                    position: *location,
                     modifiers: self.primary_state.modifiers,
                     pressure: if matches!(phase, Ended | Cancelled) {
                         0.0
@@ -225,9 +223,9 @@ struct TapState {
     /// The local tap count as of the last Down phase.
     count: u8,
     /// x coordinate.
-    x: f32,
+    x: f64,
     /// y coordinate.
-    y: f32,
+    y: f64,
 }
 
 #[derive(Debug, Default)]
@@ -246,8 +244,8 @@ impl TapCounter {
             } => {
                 let e = if let Some(i) =
                     self.taps.iter().position(|TapState { x, y, up_time, .. }| {
-                        let dx = (x - state.x).abs();
-                        let dy = (y - state.y).abs();
+                        let dx = (x - state.position.x).abs();
+                        let dy = (y - state.position.y).abs();
                         (dx * dx + dy * dy).sqrt() < 4.0 && (up_time + 500_000_000) > state.time
                     }) {
                     let count = self.taps[i].count + 1;
@@ -255,8 +253,8 @@ impl TapCounter {
                     self.taps[i].pointer_id = pointer.pointer_id;
                     self.taps[i].down_time = state.time;
                     self.taps[i].up_time = state.time;
-                    self.taps[i].x = state.x;
-                    self.taps[i].y = state.y;
+                    self.taps[i].x = state.position.x;
+                    self.taps[i].y = state.position.y;
 
                     PointerEvent::Down {
                         button,
@@ -269,8 +267,8 @@ impl TapCounter {
                         down_time: state.time,
                         up_time: state.time,
                         count: 1,
-                        x: state.x,
-                        y: state.y,
+                        x: state.position.x,
+                        y: state.position.y,
                     };
                     self.taps.push(s);
                     PointerEvent::Down {

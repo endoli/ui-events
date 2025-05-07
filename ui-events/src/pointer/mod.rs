@@ -12,6 +12,7 @@ use alloc::vec::Vec;
 
 use core::num::NonZeroU64;
 
+use dpi::{PhysicalPosition, PhysicalSize};
 use keyboard_types::Modifiers;
 
 use crate::ScrollDelta;
@@ -84,27 +85,6 @@ pub struct PointerInfo {
     pub pointer_type: PointerType,
 }
 
-/// The size of an input, usually touch.
-///
-/// If this is not provided by the underlying API, platform, or device,
-/// then it will default to a single pixel.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct ContactGeometry {
-    /// The width of the contact geometry.
-    pub width: f32,
-    /// The height of the contact geometry.
-    pub height: f32,
-}
-
-impl Default for ContactGeometry {
-    fn default() -> Self {
-        Self {
-            width: 1.0,
-            height: 1.0,
-        }
-    }
-}
-
 /// Orientation of a pointer.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct PointerOrientation {
@@ -127,6 +107,12 @@ impl Default for PointerOrientation {
     }
 }
 
+/// The size of an input, usually touch.
+///
+/// If this is not provided by the underlying API, platform, or device,
+/// then it should be a single pixel.
+pub type ContactGeometry = PhysicalSize<f64>;
+
 /// A single pointer state.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PointerState {
@@ -136,21 +122,18 @@ pub struct PointerState {
     /// generally be the same at least for states originating from the
     /// same device.
     pub time: u64,
-    /// x position.
-    ///
-    /// Coordinate space is by convention.
-    pub x: f32,
-    /// y position.
-    ///
-    /// Coordinate space is by convention.
-    pub y: f32,
+    /// Position.
+    pub position: PhysicalPosition<f64>,
     /// Pressed buttons.
     pub buttons: PointerButtons,
     /// Modifiers state.
     pub modifiers: Modifiers,
     /// Click or tap count associated with the pointer.
     pub count: u8,
-    /// Contact geometry.
+    /// The size of an input, usually touch.
+    ///
+    /// If this is not provided by the underlying API, platform, or device,
+    /// then it should be a single pixel.
     pub contact_geometry: ContactGeometry,
     /// Orientation.
     pub orientation: PointerOrientation,
@@ -172,12 +155,14 @@ impl Default for PointerState {
     fn default() -> Self {
         Self {
             time: 0,
-            x: 0.0,
-            y: 0.0,
+            position: PhysicalPosition::<f64>::default(),
             buttons: PointerButtons::default(),
             modifiers: Modifiers::default(),
             count: 0,
-            contact_geometry: ContactGeometry::default(),
+            contact_geometry: ContactGeometry {
+                width: 1.0,
+                height: 1.0,
+            },
             orientation: PointerOrientation::default(),
             // No buttons pressed, therefore no pressure.
             pressure: 0.0,
@@ -252,5 +237,7 @@ pub enum PointerEvent {
         pointer: PointerInfo,
         /// The delta of the scroll.
         delta: ScrollDelta,
+        /// The state of the pointer (i.e. position, pressure, etc.).
+        state: PointerState,
     },
 }
