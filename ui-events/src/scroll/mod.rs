@@ -3,6 +3,8 @@
 
 #![allow(missing_docs)]
 
+use dpi::PhysicalPosition;
+
 /// Scroll delta.
 ///
 /// For mouse wheel events, only `LineDelta` and `PixelDelta` are typical.
@@ -14,5 +16,5 @@ pub enum ScrollDelta {
 
     LineDelta(f32, f32),
 
-    PixelDelta(f32, f32),
+    PixelDelta(PhysicalPosition<f64>),
 }
