@@ -30,9 +30,10 @@ use std::time::Instant;
 use ui_events::{
     keyboard::KeyboardEvent,
     pointer::{PointerEvent, PointerId, PointerInfo, PointerState, PointerType, PointerUpdate},
+    ScrollDelta,
 };
 use winit::{
-    event::{ElementState, Force, Touch, TouchPhase, WindowEvent},
+    event::{ElementState, Force, MouseScrollDelta, Touch, TouchPhase, WindowEvent},
     keyboard::ModifiersState,
 };
 
@@ -142,6 +143,16 @@ impl WindowEventReducer {
                         state: self.primary_state.clone(),
                     },
                 )))
+            }
+            WindowEvent::MouseWheel { delta, .. } => {
+                Some(WindowEventTranslation::Pointer(PointerEvent::Scroll {
+                    pointer: PRIMARY_MOUSE,
+                    delta: match *delta {
+                        MouseScrollDelta::LineDelta(x, y) => ScrollDelta::LineDelta(x, y),
+                        MouseScrollDelta::PixelDelta(p) => ScrollDelta::PixelDelta(p),
+                    },
+                    state: self.primary_state.clone(),
+                }))
             }
             WindowEvent::Touch(Touch {
                 phase,
