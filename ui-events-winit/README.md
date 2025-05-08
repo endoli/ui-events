@@ -25,8 +25,8 @@ See https://linebender.org/blog/doc-include/ for related discussion. -->
 [`WindowEventReducer`]: https://docs.rs/ui-events-winit/latest/ui_events_winit/struct.WindowEventReducer.html
 <!-- cargo-rdme start -->
 
-This crate provides an adapter between [`winit`] events and
-[`ui-events`].
+This crate bridges [`winit`]'s native input events (mouse, touch, keyboard, etc.)
+into the [`ui-events`] model.
 
 The primary entry point is [`WindowEventReducer`].
 

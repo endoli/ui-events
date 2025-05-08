@@ -1,8 +1,8 @@
 // Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! This crate provides an adapter between [`winit`] events and
-//! [`ui-events`].
+//! This crate bridges [`winit`]'s native input events (mouse, touch, keyboard, etc.)
+//! into the [`ui-events`] model.
 //!
 //! The primary entry point is [`WindowEventReducer`].
 
