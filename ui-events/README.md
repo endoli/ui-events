@@ -22,11 +22,25 @@ Full documentation at https://github.com/orium/cargo-rdme -->
 See https://linebender.org/blog/doc-include/ for related discussion. -->
 <!-- cargo-rdme start -->
 
-UI Events is a Rust crate which ...
+A cross-platform input event abstraction modeled after W3C UI Events specifications.
+
+Provides common vocabulary types for working with pointer events (mouse, touch, pen) and
+keyboard events in a platform-agnostic way. The crate aims to closely follow W3C standards
+while remaining practical for native application development.
+
+Includes support for:
+
+- Pointer events (down/move/up, pressure, tilt, etc.)
+- Keyboard events (key codes, modifiers, location)
+
+For integration with [`winit`], use the companion [`ui-events-winit`] adapter crate.
 
 ## Features
 
 - `std` (enabled by default): Use the Rust standard library.
+
+[`winit`]: https://docs.rs/winit/
+[`ui-events-winit`]: https://docs.rs/ui-events-winit/
 
 <!-- cargo-rdme end -->
 
