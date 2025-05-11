@@ -5,6 +5,8 @@
 //! into the [`ui-events`] model.
 //!
 //! The primary entry point is [`WindowEventReducer`].
+//!
+//! [`ui-events`]: https://docs.rs/ui-events/
 
 // LINEBENDER LINT SET - lib.rs - v3
 // See https://linebender.org/wiki/canonical-lints/
