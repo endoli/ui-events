@@ -20,8 +20,8 @@ Full documentation at https://github.com/orium/cargo-rdme -->
 
 <!-- Intra-doc links used in lib.rs should be evaluated here.
 See https://linebender.org/blog/doc-include/ for related discussion. -->
-[`ui-events`]: https://crates.io/crates/ui-events
-[`winit`]: https://crates.io/crates/winit
+[`ui-events`]: https://docs.rs/ui-events/
+[`winit`]: https://docs.rs/winit/
 [`WindowEventReducer`]: https://docs.rs/ui-events-winit/latest/ui_events_winit/struct.WindowEventReducer.html
 <!-- cargo-rdme start -->
 
@@ -29,6 +29,8 @@ This crate bridges [`winit`]'s native input events (mouse, touch, keyboard, etc.
 into the [`ui-events`] model.
 
 The primary entry point is [`WindowEventReducer`].
+
+[`ui-events`]: https://docs.rs/ui-events/
 
 <!-- cargo-rdme end -->
 

@@ -18,8 +18,8 @@
 //!
 //! - `std` (enabled by default): Use the Rust standard library.
 //!
-//! [`winit`]: https://docs.rs/winit/
 //! [`ui-events-winit`]: https://docs.rs/ui-events-winit/
+//! [`winit`]: https://docs.rs/winit/
 // LINEBENDER LINT SET - lib.rs - v3
 // See https://linebender.org/wiki/canonical-lints/
 // These lints shouldn't apply to examples or tests.

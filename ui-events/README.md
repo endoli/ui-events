@@ -39,8 +39,8 @@ For integration with [`winit`], use the companion [`ui-events-winit`] adapter cr
 
 - `std` (enabled by default): Use the Rust standard library.
 
-[`winit`]: https://docs.rs/winit/
 [`ui-events-winit`]: https://docs.rs/ui-events-winit/
+[`winit`]: https://docs.rs/winit/
 
 <!-- cargo-rdme end -->
 
