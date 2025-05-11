@@ -8,14 +8,14 @@ A library for working with UI theme types.
 [![dependency status](https://deps.rs/repo/github/endoli/ui-events/status.svg)](https://deps.rs/repo/github/endoli/ui-events)
 [![Apache 2.0 or MIT license.](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg)](#license)
 [![Build status](https://github.com/endoli/ui-events/workflows/CI/badge.svg)](https://github.com/endoli/ui-events/actions)
-[![Crates.io](https://img.shields.io/crates/v/ui-events.svg)](https://crates.io/crates/ui-events)
-[![Docs](https://docs.rs/ui-events/badge.svg)](https://docs.rs/ui-events)
+[![Crates.io](https://img.shields.io/crates/v/ui-theme.svg)](https://crates.io/crates/ui-theme)
+[![Docs](https://docs.rs/ui-theme/badge.svg)](https://docs.rs/ui-theme)
 
 </div>
 
 <!-- We use cargo-rdme to update the README with the contents of lib.rs.
 To edit the following section, update it in lib.rs, then run:
-cargo rdme --workspace-project=ui-events --heading-base-level=0
+cargo rdme --workspace-project=ui-theme --heading-base-level=0
 Full documentation at https://github.com/orium/cargo-rdme -->
 
 <!-- Intra-doc links used in lib.rs should be evaluated here. 
