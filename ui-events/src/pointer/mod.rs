@@ -32,6 +32,12 @@ impl PointerId {
     pub fn new(n: u64) -> Option<Self> {
         NonZeroU64::new(n).map(PointerId)
     }
+
+    /// Return `true` if this is the primary `PointerId`.
+    #[inline(always)]
+    pub fn is_primary_pointer(self) -> bool {
+        self == Self::PRIMARY
+    }
 }
 
 /// An identifier for the pointing device that is stable across the session.
@@ -83,6 +89,14 @@ pub struct PointerInfo {
     pub persistent_device_id: Option<PersistentDeviceId>,
     /// Pointer type.
     pub pointer_type: PointerType,
+}
+
+impl PointerInfo {
+    /// Returns `true` if this is the primary pointer.
+    #[inline(always)]
+    pub fn is_primary_pointer(&self) -> bool {
+        self.pointer_id.is_some_and(|id| id.is_primary_pointer())
+    }
 }
 
 /// Orientation of a pointer.
@@ -192,6 +206,14 @@ pub struct PointerUpdate {
     pub predicted: Vec<PointerState>,
 }
 
+impl PointerUpdate {
+    /// Returns `true` if this is the primary pointer.
+    #[inline(always)]
+    pub fn is_primary_pointer(&self) -> bool {
+        self.pointer.is_primary_pointer()
+    }
+}
+
 /// A standard `PointerEvent`.
 ///
 /// This is intentionally limited to standard pointer events,
@@ -240,4 +262,20 @@ pub enum PointerEvent {
         /// The state of the pointer (i.e. position, pressure, etc.).
         state: PointerState,
     },
+}
+
+impl PointerEvent {
+    /// Returns `true` if this event is for the primary pointer.
+    #[inline(always)]
+    pub fn is_primary_pointer(&self) -> bool {
+        match self {
+            Self::Down { pointer, .. }
+            | Self::Up { pointer, .. }
+            | Self::Move(PointerUpdate { pointer, .. })
+            | Self::Cancel(pointer)
+            | Self::Enter(pointer)
+            | Self::Leave(pointer)
+            | Self::Scroll { pointer, .. } => pointer.is_primary_pointer(),
+        }
+    }
 }
