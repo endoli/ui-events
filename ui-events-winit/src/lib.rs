@@ -31,7 +31,10 @@ use std::time::Instant;
 
 use ui_events::{
     keyboard::KeyboardEvent,
-    pointer::{PointerEvent, PointerId, PointerInfo, PointerState, PointerType, PointerUpdate},
+    pointer::{
+        PointerEvent, PointerGesture, PointerId, PointerInfo, PointerState, PointerType,
+        PointerUpdate,
+    },
     ScrollDelta,
 };
 use winit::{
@@ -54,6 +57,8 @@ use winit::{
 ///  - [`CursorMoved`][`WindowEvent::CursorMoved`]
 ///  - [`CursorEntered`][`WindowEvent::CursorEntered`]
 ///  - [`CursorLeft`][`WindowEvent::CursorLeft`]
+///  - [`PinchGesture`][`WindowEvent::PinchGesture`]
+///  - [`RotationGesture`][`WindowEvent::RotationGesture`]
 #[derive(Debug, Default)]
 pub struct WindowEventReducer {
     /// State of modifiers.
@@ -153,6 +158,23 @@ impl WindowEventReducer {
                         MouseScrollDelta::LineDelta(x, y) => ScrollDelta::LineDelta(x, y),
                         MouseScrollDelta::PixelDelta(p) => ScrollDelta::PixelDelta(p),
                     },
+                    state: self.primary_state.clone(),
+                }))
+            }
+            // Winit documentation says delta can be NaN; that is totally useless, so discard.
+            WindowEvent::PinchGesture { delta, .. } if delta.is_finite() => {
+                Some(WindowEventTranslation::Pointer(PointerEvent::Gesture {
+                    pointer: PRIMARY_MOUSE,
+                    gesture: PointerGesture::Pinch(*delta as f32),
+                    state: self.primary_state.clone(),
+                }))
+            }
+            // Winit documentation says delta can be NaN; that is totally useless, so discard.
+            WindowEvent::RotationGesture { delta, .. } if delta.is_finite() => {
+                Some(WindowEventTranslation::Pointer(PointerEvent::Gesture {
+                    pointer: PRIMARY_MOUSE,
+                    // Winit gives this in counterclockwise degrees.
+                    gesture: PointerGesture::Rotate((-*delta).to_radians()),
                     state: self.primary_state.clone(),
                 }))
             }
@@ -363,7 +385,9 @@ impl TapCounter {
                     .retain(|TapState { pointer_id, .. }| *pointer_id != p.pointer_id);
                 e.clone()
             }
-            PointerEvent::Enter(..) | PointerEvent::Scroll { .. } => e.clone(),
+            PointerEvent::Enter(..)
+            | PointerEvent::Scroll { .. }
+            | PointerEvent::Gesture { .. } => e.clone(),
         }
     }
 
