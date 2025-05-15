@@ -236,6 +236,30 @@ pub struct PointerScrollEvent {
     pub state: PointerState,
 }
 
+/// A touchpad gesture for pointer.
+#[derive(Clone, Debug)]
+pub enum PointerGesture {
+    /// Pinch factor.
+    ///
+    /// This is a signed quantity as a fraction of the current scale,
+    /// to derive a new scale you might use `1. + x * s` where `s`
+    /// is your current scale, and `x` is this factor.
+    Pinch(f32),
+    /// Clockwise rotation in radians.
+    Rotate(f32),
+}
+
+/// An event representing a scroll
+#[derive(Clone, Debug)]
+pub struct PointerGestureEvent {
+    /// Identity of the pointer.
+    pub pointer: PointerInfo,
+    /// The gesture being performed.
+    pub gesture: PointerGesture,
+    /// The state of the pointer (i.e. position, pressure, etc.).
+    pub state: PointerState,
+}
+
 /// A standard `PointerEvent`.
 ///
 /// This is intentionally limited to standard pointer events,
@@ -263,6 +287,8 @@ pub enum PointerEvent {
     ///
     /// Usually this is caused by a mouse wheel or a touchpad.
     Scroll(PointerScrollEvent),
+    /// Gesture at pointer.
+    Gesture(PointerGestureEvent),
 }
 
 impl PointerEvent {
@@ -276,7 +302,8 @@ impl PointerEvent {
             | Self::Cancel(pointer)
             | Self::Enter(pointer)
             | Self::Leave(pointer)
-            | Self::Scroll(PointerScrollEvent { pointer, .. }) => pointer.is_primary_pointer(),
+            | Self::Scroll(PointerScrollEvent { pointer, .. })
+            | Self::Gesture(PointerGestureEvent { pointer, .. }) => pointer.is_primary_pointer(),
         }
     }
 }

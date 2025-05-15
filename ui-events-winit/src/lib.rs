@@ -38,8 +38,8 @@ pub use web_time::Instant;
 use ui_events::{
     keyboard::KeyboardEvent,
     pointer::{
-        PointerButtonEvent, PointerEvent, PointerId, PointerInfo, PointerScrollEvent, PointerState,
-        PointerType, PointerUpdate,
+        PointerButtonEvent, PointerEvent, PointerGesture, PointerGestureEvent, PointerId,
+        PointerInfo, PointerScrollEvent, PointerState, PointerType, PointerUpdate,
     },
     ScrollDelta,
 };
@@ -63,6 +63,8 @@ use winit::{
 ///  - [`CursorMoved`][`WindowEvent::CursorMoved`]
 ///  - [`CursorEntered`][`WindowEvent::CursorEntered`]
 ///  - [`CursorLeft`][`WindowEvent::CursorLeft`]
+///  - [`PinchGesture`][`WindowEvent::PinchGesture`]
+///  - [`RotationGesture`][`WindowEvent::RotationGesture`]
 #[derive(Debug, Default)]
 pub struct WindowEventReducer {
     /// State of modifiers.
@@ -172,6 +174,25 @@ impl WindowEventReducer {
                     state: self.primary_state.clone(),
                 }),
             )),
+            // Winit documentation says delta can be NaN; that is totally useless, so discard.
+            WindowEvent::PinchGesture { delta, .. } if delta.is_finite() => Some(
+                WindowEventTranslation::Pointer(PointerEvent::Gesture(PointerGestureEvent {
+                    pointer: PRIMARY_MOUSE,
+                    gesture: PointerGesture::Pinch(*delta as f32),
+                    state: self.primary_state.clone(),
+                })),
+            ),
+            // Winit documentation says delta can be NaN; that is totally useless, so discard.
+            WindowEvent::RotationGesture { delta, .. } if delta.is_finite() => {
+                Some(WindowEventTranslation::Pointer(PointerEvent::Gesture(
+                    PointerGestureEvent {
+                        pointer: PRIMARY_MOUSE,
+                        // Winit gives this in counterclockwise degrees.
+                        gesture: PointerGesture::Rotate((-*delta).to_radians()),
+                        state: self.primary_state.clone(),
+                    },
+                )))
+            }
             WindowEvent::Touch(Touch {
                 phase,
                 id,
@@ -376,7 +397,8 @@ impl TapCounter {
                     .retain(|TapState { pointer_id, .. }| *pointer_id != p.pointer_id);
                 PointerEvent::Leave(p)
             }
-            e @ (PointerEvent::Enter(..) | PointerEvent::Scroll(..)) => e,
+            e
+            @ (PointerEvent::Enter(..) | PointerEvent::Scroll(..) | PointerEvent::Gesture(..)) => e,
         }
     }
 
