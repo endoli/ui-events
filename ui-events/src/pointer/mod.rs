@@ -95,7 +95,7 @@ impl PointerInfo {
     /// Returns `true` if this is the primary pointer.
     #[inline(always)]
     pub fn is_primary_pointer(&self) -> bool {
-        self.pointer_id.is_some_and(|id| id.is_primary_pointer())
+        self.pointer_id.is_some_and(PointerId::is_primary_pointer)
     }
 }
 
