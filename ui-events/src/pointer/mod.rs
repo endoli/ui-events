@@ -12,7 +12,7 @@ use alloc::vec::Vec;
 
 use core::num::NonZeroU64;
 
-use dpi::{PhysicalPosition, PhysicalSize};
+use dpi::PhysicalSize;
 use keyboard_types::Modifiers;
 
 use crate::ScrollDelta;
@@ -129,7 +129,7 @@ pub type ContactGeometry = PhysicalSize<f64>;
 
 /// A single pointer state.
 #[derive(Clone, Debug, PartialEq)]
-pub struct PointerState {
+pub struct PointerState<P> {
     /// `u64` nanoseconds real time.
     ///
     /// The base time is not important, except by convention, and should
@@ -137,7 +137,7 @@ pub struct PointerState {
     /// same device.
     pub time: u64,
     /// Position.
-    pub position: PhysicalPosition<f64>,
+    pub position: P,
     /// Pressed buttons.
     pub buttons: PointerButtons,
     /// Modifiers state.
@@ -165,11 +165,11 @@ pub struct PointerState {
     pub tangential_pressure: f32,
 }
 
-impl Default for PointerState {
+impl<P: Default> Default for PointerState<P> {
     fn default() -> Self {
         Self {
             time: 0,
-            position: PhysicalPosition::<f64>::default(),
+            position: P::default(),
             buttons: PointerButtons::default(),
             modifiers: Modifiers::default(),
             count: 0,
@@ -187,26 +187,26 @@ impl Default for PointerState {
 
 /// A pointer update, along with coalesced and predicted states.
 #[derive(Clone, Debug, PartialEq)]
-pub struct PointerUpdate {
+pub struct PointerUpdate<P> {
     /// Identifying information about pointer.
     pub pointer: PointerInfo,
     /// Current state.
-    pub current: PointerState,
+    pub current: PointerState<P>,
     /// Coalesced states, ordered by `time`.
     ///
     /// Coalescing is application-specific.
     /// On the web, the browser does its own coalescing, whereas
     /// on other platforms you may do your own, or forego it
     /// altogether, delivering every state.
-    pub coalesced: Vec<PointerState>,
+    pub coalesced: Vec<PointerState<P>>,
     /// Predicted states, ordered by `time`.
     ///
     /// Some platforms provide predicted states directly,
     /// and you may choose to add your own predictor.
-    pub predicted: Vec<PointerState>,
+    pub predicted: Vec<PointerState<P>>,
 }
 
-impl PointerUpdate {
+impl<P> PointerUpdate<P> {
     /// Returns `true` if this is the primary pointer.
     #[inline(always)]
     pub fn is_primary_pointer(&self) -> bool {
@@ -221,7 +221,7 @@ impl PointerUpdate {
 /// support more event types will use this as a base and add
 /// what they need in a conversion.
 #[derive(Clone, Debug)]
-pub enum PointerEvent {
+pub enum PointerEvent<P> {
     /// A [`PointerButton`] was pressed.
     Down {
         /// The [`PointerButton`] that was pressed..
@@ -229,7 +229,7 @@ pub enum PointerEvent {
         /// Identity of the pointer.
         pointer: PointerInfo,
         /// The state of the pointer (i.e. position, pressure, etc.).
-        state: PointerState,
+        state: PointerState<P>,
     },
     /// A [`PointerButton`] was released.
     Up {
@@ -238,10 +238,10 @@ pub enum PointerEvent {
         /// Identity of the pointer.
         pointer: PointerInfo,
         /// The state of the pointer (i.e. position, pressure, etc.).
-        state: PointerState,
+        state: PointerState<P>,
     },
     /// Pointer moved.
-    Move(PointerUpdate),
+    Move(PointerUpdate<P>),
     /// Pointer motion was cancelled.
     ///
     /// Usually this is a touch which was taken over somewhere else.
@@ -260,11 +260,11 @@ pub enum PointerEvent {
         /// The delta of the scroll.
         delta: ScrollDelta,
         /// The state of the pointer (i.e. position, pressure, etc.).
-        state: PointerState,
+        state: PointerState<P>,
     },
 }
 
-impl PointerEvent {
+impl<P> PointerEvent<P> {
     /// Returns `true` if this event is for the primary pointer.
     #[inline(always)]
     pub fn is_primary_pointer(&self) -> bool {
