@@ -318,9 +318,9 @@ impl TapCounter {
             }
             PointerEvent::Move(PointerUpdate {
                 pointer,
-                ref current,
-                ref coalesced,
-                ref predicted,
+                mut current,
+                mut coalesced,
+                mut predicted,
             }) => {
                 if let Some(TapState { count, .. }) = self
                     .taps
@@ -337,33 +337,39 @@ impl TapCounter {
                     )
                     .cloned()
                 {
+                    current.count = count;
+                    for event in coalesced.iter_mut() {
+                        event.count = count;
+                    }
+                    for event in predicted.iter_mut() {
+                        event.count = count;
+                    }
                     PointerEvent::Move(PointerUpdate {
                         pointer,
-                        current: PointerState {
-                            count,
-                            ..current.clone()
-                        },
-                        coalesced: coalesced
-                            .iter()
-                            .cloned()
-                            .map(|u| PointerState { count, ..u })
-                            .collect(),
-                        predicted: predicted
-                            .iter()
-                            .cloned()
-                            .map(|u| PointerState { count, ..u })
-                            .collect(),
+                        current,
+                        coalesced,
+                        predicted,
                     })
                 } else {
-                    e
+                    PointerEvent::Move(PointerUpdate {
+                        pointer,
+                        current,
+                        coalesced,
+                        predicted,
+                    })
                 }
             }
-            PointerEvent::Cancel(p) | PointerEvent::Leave(p) => {
+            PointerEvent::Cancel(p) => {
                 self.taps
                     .retain(|TapState { pointer_id, .. }| *pointer_id != p.pointer_id);
-                e.clone()
+                PointerEvent::Cancel(p)
             }
-            PointerEvent::Enter(..) | PointerEvent::Scroll { .. } => e.clone(),
+            PointerEvent::Leave(p) => {
+                self.taps
+                    .retain(|TapState { pointer_id, .. }| *pointer_id != p.pointer_id);
+                PointerEvent::Cancel(p)
+            }
+            e @ (PointerEvent::Enter(..) | PointerEvent::Scroll { .. }) => e,
         }
     }
 
