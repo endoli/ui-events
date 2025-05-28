@@ -214,6 +214,17 @@ impl PointerUpdate {
     }
 }
 
+/// An event representing a [`PointerButton`] that was pressed or released.
+#[derive(Clone, Debug)]
+pub struct PointerButtonPressEvent {
+    /// The [`PointerButton`] that was pressed..
+    pub button: Option<PointerButton>,
+    /// Identity of the pointer.
+    pub pointer: PointerInfo,
+    /// The state of the pointer (i.e. position, pressure, etc.).
+    pub state: PointerState,
+}
+
 /// A standard `PointerEvent`.
 ///
 /// This is intentionally limited to standard pointer events,
@@ -223,23 +234,9 @@ impl PointerUpdate {
 #[derive(Clone, Debug)]
 pub enum PointerEvent {
     /// A [`PointerButton`] was pressed.
-    Down {
-        /// The [`PointerButton`] that was pressed..
-        button: Option<PointerButton>,
-        /// Identity of the pointer.
-        pointer: PointerInfo,
-        /// The state of the pointer (i.e. position, pressure, etc.).
-        state: PointerState,
-    },
+    Down(PointerButtonPressEvent),
     /// A [`PointerButton`] was released.
-    Up {
-        /// The [`PointerButton`] that was released.
-        button: Option<PointerButton>,
-        /// Identity of the pointer.
-        pointer: PointerInfo,
-        /// The state of the pointer (i.e. position, pressure, etc.).
-        state: PointerState,
-    },
+    Up(PointerButtonPressEvent),
     /// Pointer moved.
     Move(PointerUpdate),
     /// Pointer motion was cancelled.
@@ -269,8 +266,8 @@ impl PointerEvent {
     #[inline(always)]
     pub fn is_primary_pointer(&self) -> bool {
         match self {
-            Self::Down { pointer, .. }
-            | Self::Up { pointer, .. }
+            Self::Down(PointerButtonPressEvent { pointer, .. })
+            | Self::Up(PointerButtonPressEvent { pointer, .. })
             | Self::Move(PointerUpdate { pointer, .. })
             | Self::Cancel(pointer)
             | Self::Enter(pointer)

@@ -31,7 +31,10 @@ use std::time::Instant;
 
 use ui_events::{
     keyboard::KeyboardEvent,
-    pointer::{PointerEvent, PointerId, PointerInfo, PointerState, PointerType, PointerUpdate},
+    pointer::{
+        PointerButtonPressEvent, PointerEvent, PointerId, PointerInfo, PointerState, PointerType,
+        PointerUpdate,
+    },
     ScrollDelta,
 };
 use winit::{
@@ -121,11 +124,11 @@ impl WindowEventReducer {
                 }
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
-                    PointerEvent::Down {
+                    PointerEvent::Down(PointerButtonPressEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
                         state: self.primary_state.clone(),
-                    },
+                    }),
                 )))
             }
             WindowEvent::MouseInput {
@@ -139,11 +142,11 @@ impl WindowEventReducer {
                 }
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
-                    PointerEvent::Up {
+                    PointerEvent::Up(PointerButtonPressEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
                         state: self.primary_state.clone(),
-                    },
+                    }),
                 )))
             }
             WindowEvent::MouseWheel { delta, .. } => {
@@ -189,11 +192,11 @@ impl WindowEventReducer {
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
                     match phase {
-                        Started => PointerEvent::Down {
+                        Started => PointerEvent::Down(PointerButtonPressEvent {
                             pointer,
                             button: None,
                             state,
-                        },
+                        }),
                         Moved => PointerEvent::Move(PointerUpdate {
                             pointer,
                             current: state,
@@ -201,11 +204,11 @@ impl WindowEventReducer {
                             predicted: vec![],
                         }),
                         Cancelled => PointerEvent::Cancel(pointer),
-                        Ended => PointerEvent::Up {
+                        Ended => PointerEvent::Up(PointerButtonPressEvent {
                             pointer,
                             button: None,
                             state,
-                        },
+                        }),
                     },
                 )))
             }
@@ -250,71 +253,48 @@ impl TapCounter {
     /// Enhance a [`PointerEvent`] with a `count`.
     fn attach_count(&mut self, e: PointerEvent) -> PointerEvent {
         match e {
-            PointerEvent::Down {
-                button,
-                pointer,
-                state,
-            } => {
-                let e = if let Some(i) =
-                    self.taps.iter().position(|TapState { x, y, up_time, .. }| {
-                        let dx = (x - state.position.x).abs();
-                        let dy = (y - state.position.y).abs();
-                        (dx * dx + dy * dy).sqrt() < 4.0 && (up_time + 500_000_000) > state.time
-                    }) {
-                    let count = self.taps[i].count + 1;
-                    self.taps[i].count = count;
-                    self.taps[i].pointer_id = pointer.pointer_id;
-                    self.taps[i].down_time = state.time;
-                    self.taps[i].up_time = state.time;
-                    self.taps[i].x = state.position.x;
-                    self.taps[i].y = state.position.y;
+            PointerEvent::Down(mut event) => {
+                let pointer_id = event.pointer.pointer_id;
+                let position = event.state.position;
+                let time = event.state.time;
 
-                    PointerEvent::Down {
-                        button,
-                        pointer,
-                        state: PointerState { count, ..state },
-                    }
+                if let Some(tap) =
+                    self.taps.iter_mut().find(|TapState { x, y, up_time, .. }| {
+                        let dx = (x - position.x).abs();
+                        let dy = (y - position.y).abs();
+                        (dx * dx + dy * dy).sqrt() < 4.0 && (up_time + 500_000_000) > time
+                    })
+                {
+                    let count = tap.count + 1;
+                    event.state.count = count;
+                    tap.count = count;
+                    tap.pointer_id = pointer_id;
+                    tap.down_time = time;
+                    tap.up_time = time;
+                    tap.x = position.x;
+                    tap.y = position.y;
                 } else {
                     let s = TapState {
-                        pointer_id: pointer.pointer_id,
-                        down_time: state.time,
-                        up_time: state.time,
+                        pointer_id: pointer_id,
+                        down_time: time,
+                        up_time: time,
                         count: 1,
-                        x: state.position.x,
-                        y: state.position.y,
+                        x: position.x,
+                        y: position.y,
                     };
                     self.taps.push(s);
-                    PointerEvent::Down {
-                        button,
-                        pointer,
-                        state: PointerState { count: 1, ..state },
-                    }
+                    event.state.count = 1;
                 };
-                self.clear_expired(state.time);
-                e
+                self.clear_expired(time);
+                PointerEvent::Down(event)
             }
-            PointerEvent::Up {
-                button,
-                pointer,
-                ref state,
-            } => {
-                if let Some(i) = self
-                    .taps
-                    .iter()
-                    .position(|TapState { pointer_id, .. }| *pointer_id == pointer.pointer_id)
-                {
-                    self.taps[i].up_time = state.time;
-                    PointerEvent::Up {
-                        button,
-                        pointer,
-                        state: PointerState {
-                            count: self.taps[i].count,
-                            ..state.clone()
-                        },
-                    }
-                } else {
-                    e.clone()
+            PointerEvent::Up(mut event) => {
+                let p_id = event.pointer.pointer_id;
+                if let Some(tap) = self.taps.iter_mut().find(|state| state.pointer_id == p_id) {
+                    tap.up_time = event.state.time;
+                    event.state.count = tap.count;
                 }
+                PointerEvent::Up(event)
             }
             PointerEvent::Move(PointerUpdate {
                 pointer,
