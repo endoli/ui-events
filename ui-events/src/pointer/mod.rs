@@ -216,11 +216,22 @@ impl PointerUpdate {
 
 /// An event representing a [`PointerButton`] that was pressed or released.
 #[derive(Clone, Debug)]
-pub struct PointerButtonPressEvent {
+pub struct PointerButtonEvent {
     /// The [`PointerButton`] that was pressed..
     pub button: Option<PointerButton>,
     /// Identity of the pointer.
     pub pointer: PointerInfo,
+    /// The state of the pointer (i.e. position, pressure, etc.).
+    pub state: PointerState,
+}
+
+/// An event representing a scroll
+#[derive(Clone, Debug)]
+pub struct PointerScrollEvent {
+    /// Identity of the pointer.
+    pub pointer: PointerInfo,
+    /// The delta of the scroll.
+    pub delta: ScrollDelta,
     /// The state of the pointer (i.e. position, pressure, etc.).
     pub state: PointerState,
 }
@@ -234,9 +245,9 @@ pub struct PointerButtonPressEvent {
 #[derive(Clone, Debug)]
 pub enum PointerEvent {
     /// A [`PointerButton`] was pressed.
-    Down(PointerButtonPressEvent),
+    Down(PointerButtonEvent),
     /// A [`PointerButton`] was released.
-    Up(PointerButtonPressEvent),
+    Up(PointerButtonEvent),
     /// Pointer moved.
     Move(PointerUpdate),
     /// Pointer motion was cancelled.
@@ -251,14 +262,7 @@ pub enum PointerEvent {
     /// A scroll was requested at the pointer location.
     ///
     /// Usually this is caused by a mouse wheel or a touchpad.
-    Scroll {
-        /// Identity of the pointer.
-        pointer: PointerInfo,
-        /// The delta of the scroll.
-        delta: ScrollDelta,
-        /// The state of the pointer (i.e. position, pressure, etc.).
-        state: PointerState,
-    },
+    Scroll(PointerScrollEvent),
 }
 
 impl PointerEvent {
@@ -266,13 +270,13 @@ impl PointerEvent {
     #[inline(always)]
     pub fn is_primary_pointer(&self) -> bool {
         match self {
-            Self::Down(PointerButtonPressEvent { pointer, .. })
-            | Self::Up(PointerButtonPressEvent { pointer, .. })
+            Self::Down(PointerButtonEvent { pointer, .. })
+            | Self::Up(PointerButtonEvent { pointer, .. })
             | Self::Move(PointerUpdate { pointer, .. })
             | Self::Cancel(pointer)
             | Self::Enter(pointer)
             | Self::Leave(pointer)
-            | Self::Scroll { pointer, .. } => pointer.is_primary_pointer(),
+            | Self::Scroll(PointerScrollEvent { pointer, .. }) => pointer.is_primary_pointer(),
         }
     }
 }

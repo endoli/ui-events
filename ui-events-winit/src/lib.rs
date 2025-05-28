@@ -32,8 +32,8 @@ use std::time::Instant;
 use ui_events::{
     keyboard::KeyboardEvent,
     pointer::{
-        PointerButtonPressEvent, PointerEvent, PointerId, PointerInfo, PointerState, PointerType,
-        PointerUpdate,
+        PointerButtonEvent, PointerEvent, PointerId, PointerInfo, PointerScrollEvent, PointerState,
+        PointerType, PointerUpdate,
     },
     ScrollDelta,
 };
@@ -124,7 +124,7 @@ impl WindowEventReducer {
                 }
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
-                    PointerEvent::Down(PointerButtonPressEvent {
+                    PointerEvent::Down(PointerButtonEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
                         state: self.primary_state.clone(),
@@ -142,23 +142,23 @@ impl WindowEventReducer {
                 }
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
-                    PointerEvent::Up(PointerButtonPressEvent {
+                    PointerEvent::Up(PointerButtonEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
                         state: self.primary_state.clone(),
                     }),
                 )))
             }
-            WindowEvent::MouseWheel { delta, .. } => {
-                Some(WindowEventTranslation::Pointer(PointerEvent::Scroll {
+            WindowEvent::MouseWheel { delta, .. } => Some(WindowEventTranslation::Pointer(
+                PointerEvent::Scroll(PointerScrollEvent {
                     pointer: PRIMARY_MOUSE,
                     delta: match *delta {
                         MouseScrollDelta::LineDelta(x, y) => ScrollDelta::LineDelta(x, y),
                         MouseScrollDelta::PixelDelta(p) => ScrollDelta::PixelDelta(p),
                     },
                     state: self.primary_state.clone(),
-                }))
-            }
+                }),
+            )),
             WindowEvent::Touch(Touch {
                 phase,
                 id,
@@ -192,7 +192,7 @@ impl WindowEventReducer {
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
                     match phase {
-                        Started => PointerEvent::Down(PointerButtonPressEvent {
+                        Started => PointerEvent::Down(PointerButtonEvent {
                             pointer,
                             button: None,
                             state,
@@ -204,7 +204,7 @@ impl WindowEventReducer {
                             predicted: vec![],
                         }),
                         Cancelled => PointerEvent::Cancel(pointer),
-                        Ended => PointerEvent::Up(PointerButtonPressEvent {
+                        Ended => PointerEvent::Up(PointerButtonEvent {
                             pointer,
                             button: None,
                             state,
@@ -275,7 +275,7 @@ impl TapCounter {
                     tap.y = position.y;
                 } else {
                     let s = TapState {
-                        pointer_id: pointer_id,
+                        pointer_id,
                         down_time: time,
                         up_time: time,
                         count: 1,
