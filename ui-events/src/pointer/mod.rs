@@ -217,7 +217,7 @@ impl PointerUpdate {
 /// An event representing a [`PointerButton`] that was pressed or released.
 #[derive(Clone, Debug)]
 pub struct PointerButtonEvent {
-    /// The [`PointerButton`] that was pressed..
+    /// The [`PointerButton`] that was pressed.
     pub button: Option<PointerButton>,
     /// Identity of the pointer.
     pub pointer: PointerInfo,
