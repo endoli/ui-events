@@ -2,7 +2,7 @@
 
 # UI Events for Winit
 
-A library for working with canvas-like scenes.
+A library for bridging [`winit`] events into the [`ui-events`] model.
 
 [![Linebender Zulip, #general channel](https://img.shields.io/badge/Linebender-%23general-blue?logo=Zulip)](https://xi.zulipchat.com/#narrow/channel/147921-general)
 [![dependency status](https://deps.rs/repo/github/endoli/ui-events/status.svg)](https://deps.rs/repo/github/endoli/ui-events)
