@@ -347,7 +347,7 @@ impl TapCounter {
             PointerEvent::Leave(p) => {
                 self.taps
                     .retain(|TapState { pointer_id, .. }| *pointer_id != p.pointer_id);
-                PointerEvent::Cancel(p)
+                PointerEvent::Leave(p)
             }
             e @ (PointerEvent::Enter(..) | PointerEvent::Scroll { .. }) => e,
         }
