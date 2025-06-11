@@ -26,8 +26,14 @@ pub mod pointer;
 extern crate alloc;
 use alloc::{vec, vec::Vec};
 
+#[cfg(not(target_arch = "wasm32"))]
 extern crate std;
-use std::time::Instant;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub use std::time::Instant;
+
+#[cfg(target_arch = "wasm32")]
+pub use web_time::Instant;
 
 use ui_events::{
     keyboard::KeyboardEvent,
