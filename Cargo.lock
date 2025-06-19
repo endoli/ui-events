@@ -1127,6 +1127,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ui-events-web"
+version = "0.1.0"
+dependencies = [
+ "ui-events",
+ "web-sys",
+]
+
+[[package]]
 name = "ui-events-winit"
 version = "0.1.0"
 dependencies = [
