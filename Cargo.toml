@@ -67,3 +67,4 @@ clippy.wildcard_dependencies = "warn"
 [workspace.dependencies]
 dpi = { version = "0.1.2", default-features = false }
 ui-events = { version = "0.1.0", path = "ui-events", default-features = false }
+web-time = "1.1.0"
