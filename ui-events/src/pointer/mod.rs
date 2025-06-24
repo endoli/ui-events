@@ -185,6 +185,28 @@ impl Default for PointerState {
     }
 }
 
+/// A relative pointer motion frame.
+///
+/// This is generally only applicable to a mouse or similar device,
+/// so touch/pen specific fields are excluded.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct PointerRelativeFrame {
+    /// `u64` nanoseconds real time.
+    ///
+    /// The base time is not important, except by convention, and should
+    /// generally be the same at least for states originating from the
+    /// same device.
+    pub time: u64,
+    /// Distance traveled from the previous state.
+    pub distance: PhysicalPosition<f64>,
+    /// Pressed buttons.
+    pub buttons: PointerButtons,
+    /// Modifiers state.
+    pub modifiers: Modifiers,
+    /// Click or tap count associated with the pointer.
+    pub count: u8,
+}
+
 /// A pointer update, along with coalesced and predicted states.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PointerUpdate {
@@ -207,6 +229,40 @@ pub struct PointerUpdate {
 }
 
 impl PointerUpdate {
+    /// Returns `true` if this is the primary pointer.
+    #[inline(always)]
+    pub fn is_primary_pointer(&self) -> bool {
+        self.pointer.is_primary_pointer()
+    }
+}
+
+/// A relative pointer motion update.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PointerRelativeMotion {
+    /// Identifying information about pointer.
+    pub pointer: PointerInfo,
+    /// Cumulative motion over the frames.
+    ///
+    /// The timestamp is for the last integrated frame.
+    pub total: PointerRelativeFrame,
+    /// All integrated frames in this motion update.
+    ///
+    /// These primarily come from event coalescing.
+    /// Coalescing is application-specific.
+    /// On the web, the browser does its own coalescing, whereas
+    /// on other platforms you may do your own, or forego it
+    /// altogether, delivering every frame.
+    ///
+    /// This includes the most recent frame.
+    pub frames: Vec<PointerRelativeFrame>,
+    /// Predicted frames, ordered by `time`.
+    ///
+    /// Some platforms provide predicted frames directly,
+    /// and you may choose to add your own predictor.
+    pub predicted: Vec<PointerRelativeFrame>,
+}
+
+impl PointerRelativeMotion {
     /// Returns `true` if this is the primary pointer.
     #[inline(always)]
     pub fn is_primary_pointer(&self) -> bool {
@@ -250,6 +306,10 @@ pub enum PointerEvent {
     Up(PointerButtonEvent),
     /// Pointer moved.
     Move(PointerUpdate),
+    /// Pointer device moved but pointer position did not.
+    ///
+    /// This is usually during a locking or confining grab.
+    RelativeMotion(PointerRelativeMotion),
     /// Pointer motion was cancelled.
     ///
     /// Usually this is a touch which was taken over somewhere else.
@@ -273,6 +333,7 @@ impl PointerEvent {
             Self::Down(PointerButtonEvent { pointer, .. })
             | Self::Up(PointerButtonEvent { pointer, .. })
             | Self::Move(PointerUpdate { pointer, .. })
+            | Self::RelativeMotion(PointerRelativeMotion { pointer, .. })
             | Self::Cancel(pointer)
             | Self::Enter(pointer)
             | Self::Leave(pointer)
