@@ -38,13 +38,14 @@ pub use web_time::Instant;
 use ui_events::{
     keyboard::KeyboardEvent,
     pointer::{
-        PointerButtonEvent, PointerEvent, PointerId, PointerInfo, PointerScrollEvent, PointerState,
-        PointerType, PointerUpdate,
+        PointerButtonEvent, PointerEvent, PointerId, PointerInfo, PointerRelativeFrame,
+        PointerRelativeMotion, PointerScrollEvent, PointerState, PointerType, PointerUpdate,
     },
     ScrollDelta,
 };
 use winit::{
-    event::{ElementState, Force, MouseScrollDelta, Touch, TouchPhase, WindowEvent},
+    dpi::PhysicalPosition,
+    event::{DeviceEvent, ElementState, Force, MouseScrollDelta, Touch, TouchPhase, WindowEvent},
     keyboard::ModifiersState,
 };
 
@@ -52,7 +53,7 @@ use winit::{
 ///
 /// Store a single instance of this per window, then call [`WindowEventReducer::reduce`]
 /// on each [`WindowEvent`] for that window.
-/// Use the [`WindowEventTranslation`] value to receive [`PointerEvent`]s and [`KeyboardEvent`]s.
+/// Use the [`EventTranslation`] value to receive [`PointerEvent`]s and [`KeyboardEvent`]s.
 ///
 /// This handles:
 ///  - [`ModifiersChanged`][`WindowEvent::ModifiersChanged`]
@@ -78,7 +79,7 @@ pub struct WindowEventReducer {
 #[allow(clippy::cast_possible_truncation)]
 impl WindowEventReducer {
     /// Process a [`WindowEvent`].
-    pub fn reduce(&mut self, we: &WindowEvent) -> Option<WindowEventTranslation> {
+    pub fn reduce(&mut self, we: &WindowEvent) -> Option<EventTranslation> {
         const PRIMARY_MOUSE: PointerInfo = PointerInfo {
             pointer_id: Some(PointerId::PRIMARY),
             // TODO: Maybe transmute device.
@@ -98,19 +99,19 @@ impl WindowEventReducer {
                 self.primary_state.modifiers = keyboard::from_winit_modifier_state(self.modifiers);
                 None
             }
-            WindowEvent::KeyboardInput { event, .. } => Some(WindowEventTranslation::Keyboard(
+            WindowEvent::KeyboardInput { event, .. } => Some(EventTranslation::Keyboard(
                 keyboard::from_winit_keyboard_event(event.clone(), self.modifiers),
             )),
-            WindowEvent::CursorEntered { .. } => Some(WindowEventTranslation::Pointer(
+            WindowEvent::CursorEntered { .. } => Some(EventTranslation::Pointer(
                 PointerEvent::Enter(PRIMARY_MOUSE),
             )),
-            WindowEvent::CursorLeft { .. } => Some(WindowEventTranslation::Pointer(
-                PointerEvent::Leave(PRIMARY_MOUSE),
-            )),
+            WindowEvent::CursorLeft { .. } => Some(EventTranslation::Pointer(PointerEvent::Leave(
+                PRIMARY_MOUSE,
+            ))),
             WindowEvent::CursorMoved { position, .. } => {
                 self.primary_state.position = *position;
 
-                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                Some(EventTranslation::Pointer(self.counter.attach_count(
                     PointerEvent::Move(PointerUpdate {
                         pointer: PRIMARY_MOUSE,
                         current: self.primary_state.clone(),
@@ -129,7 +130,7 @@ impl WindowEventReducer {
                     self.primary_state.buttons.insert(button);
                 }
 
-                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                Some(EventTranslation::Pointer(self.counter.attach_count(
                     PointerEvent::Down(PointerButtonEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
@@ -147,7 +148,7 @@ impl WindowEventReducer {
                     self.primary_state.buttons.remove(button);
                 }
 
-                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                Some(EventTranslation::Pointer(self.counter.attach_count(
                     PointerEvent::Up(PointerButtonEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
@@ -155,7 +156,7 @@ impl WindowEventReducer {
                     }),
                 )))
             }
-            WindowEvent::MouseWheel { delta, .. } => Some(WindowEventTranslation::Pointer(
+            WindowEvent::MouseWheel { delta, .. } => Some(EventTranslation::Pointer(
                 PointerEvent::Scroll(PointerScrollEvent {
                     pointer: PRIMARY_MOUSE,
                     delta: match *delta {
@@ -196,7 +197,7 @@ impl WindowEventReducer {
                     ..Default::default()
                 };
 
-                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                Some(EventTranslation::Pointer(self.counter.attach_count(
                     match phase {
                         Started => PointerEvent::Down(PointerButtonEvent {
                             pointer,
@@ -221,11 +222,48 @@ impl WindowEventReducer {
             _ => None,
         }
     }
+
+    /// Process a [`DeviceEvent`].
+    pub fn reduce_device_event(&mut self, de: &DeviceEvent) -> Option<EventTranslation> {
+        match de {
+            DeviceEvent::MouseMotion { delta: (x, y) } => {
+                const PRIMARY_MOUSE: PointerInfo = PointerInfo {
+                    pointer_id: Some(PointerId::PRIMARY),
+                    persistent_device_id: None,
+                    pointer_type: PointerType::Mouse,
+                };
+
+                let time = Instant::now()
+                    .duration_since(*self.first_instant.get_or_insert_with(Instant::now))
+                    .as_nanos() as u64;
+
+                self.primary_state.time = time;
+
+                let frame = PointerRelativeFrame {
+                    time,
+                    distance: PhysicalPosition { x: *x, y: *y },
+                    buttons: self.primary_state.buttons,
+                    modifiers: self.primary_state.modifiers,
+                    count: 0,
+                };
+
+                Some(EventTranslation::Pointer(PointerEvent::RelativeMotion(
+                    PointerRelativeMotion {
+                        pointer: PRIMARY_MOUSE,
+                        total: frame.clone(),
+                        frames: vec![frame],
+                        predicted: vec![],
+                    },
+                )))
+            }
+            _ => None,
+        }
+    }
 }
 
 /// Result of [`WindowEventReducer::reduce`].
 #[derive(Debug)]
-pub enum WindowEventTranslation {
+pub enum EventTranslation {
     /// Resulting [`KeyboardEvent`].
     Keyboard(KeyboardEvent),
     /// Resulting [`PointerEvent`].
@@ -341,6 +379,49 @@ impl TapCounter {
                         pointer,
                         current,
                         coalesced,
+                        predicted,
+                    })
+                }
+            }
+            PointerEvent::RelativeMotion(PointerRelativeMotion {
+                pointer,
+                mut total,
+                mut frames,
+                mut predicted,
+            }) => {
+                if let Some(TapState { count, .. }) = self
+                    .taps
+                    .iter()
+                    .find(
+                        |TapState {
+                             pointer_id,
+                             down_time,
+                             up_time,
+                             ..
+                         }| {
+                            *pointer_id == pointer.pointer_id && down_time == up_time
+                        },
+                    )
+                    .cloned()
+                {
+                    total.count = count;
+                    for event in frames.iter_mut() {
+                        event.count = count;
+                    }
+                    for event in predicted.iter_mut() {
+                        event.count = count;
+                    }
+                    PointerEvent::RelativeMotion(PointerRelativeMotion {
+                        pointer,
+                        total,
+                        frames,
+                        predicted,
+                    })
+                } else {
+                    PointerEvent::RelativeMotion(PointerRelativeMotion {
+                        pointer,
+                        total,
+                        frames,
                         predicted,
                     })
                 }
