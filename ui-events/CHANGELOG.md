@@ -17,7 +17,7 @@ This release has an [MSRV][] of 1.73.
 
 ### Added
 
-* `PointerId`, `PointerInfo`, `PointerUpdate`, and `PointerEvent` now have a `is_primary_pointer` methhod. ([#54][] by [@waywardmonkeys][])
+* `PointerId`, `PointerInfo`, `PointerUpdate`, and `PointerEvent` now have a `is_primary_pointer` method. ([#54][] by [@waywardmonkeys][])
 
 ## [0.1.0][] - 2025-05-08
 
