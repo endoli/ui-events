@@ -21,7 +21,9 @@
 extern crate alloc;
 
 mod input_state;
+mod keyboard_state;
 mod primary_pointer_state;
 
 pub use crate::input_state::InputState;
+pub use crate::keyboard_state::KeyboardState;
 pub use crate::primary_pointer_state::PrimaryPointerState;
