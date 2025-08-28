@@ -78,7 +78,11 @@ pub struct WindowEventReducer {
 #[allow(clippy::cast_possible_truncation)]
 impl WindowEventReducer {
     /// Process a [`WindowEvent`].
-    pub fn reduce(&mut self, we: &WindowEvent) -> Option<WindowEventTranslation> {
+    pub fn reduce(
+        &mut self,
+        scale_factor: f64,
+        we: &WindowEvent,
+    ) -> Option<WindowEventTranslation> {
         const PRIMARY_MOUSE: PointerInfo = PointerInfo {
             pointer_id: Some(PointerId::PRIMARY),
             // TODO: Maybe transmute device.
@@ -111,6 +115,7 @@ impl WindowEventReducer {
                 self.primary_state.position = *position;
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                    scale_factor,
                     PointerEvent::Move(PointerUpdate {
                         pointer: PRIMARY_MOUSE,
                         current: self.primary_state.clone(),
@@ -130,6 +135,7 @@ impl WindowEventReducer {
                 }
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                    scale_factor,
                     PointerEvent::Down(PointerButtonEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
@@ -148,6 +154,7 @@ impl WindowEventReducer {
                 }
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                    scale_factor,
                     PointerEvent::Up(PointerButtonEvent {
                         pointer: PRIMARY_MOUSE,
                         button,
@@ -197,6 +204,7 @@ impl WindowEventReducer {
                 };
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                    scale_factor,
                     match phase {
                         Started => PointerEvent::Down(PointerButtonEvent {
                             pointer,
@@ -257,18 +265,31 @@ struct TapCounter {
 
 impl TapCounter {
     /// Enhance a [`PointerEvent`] with a `count`.
-    fn attach_count(&mut self, e: PointerEvent) -> PointerEvent {
+    fn attach_count(&mut self, scale_factor: f64, e: PointerEvent) -> PointerEvent {
         match e {
             PointerEvent::Down(mut event) => {
                 let pointer_id = event.pointer.pointer_id;
                 let position = event.state.position;
                 let time = event.state.time;
 
+                let slop = match event.pointer.pointer_type {
+                    // This is on the low side of double tap slop, validated
+                    // experimentally to work on a few touchscreen laptops.
+                    PointerType::Touch => 12.0,
+                    PointerType::Pen => 6.0,
+                    // This is slightly more forgiving than the default on Windows for mice.
+                    // In order to make the slop calculation more similar between devices,
+                    // this uses a slightly different method than Windows, which tests if the
+                    // tap is in a box, rather than in a circle, centered on the anchor point.
+                    _ => 2.0,
+                } * core::f64::consts::SQRT_2
+                    * scale_factor;
+
                 if let Some(tap) =
                     self.taps.iter_mut().find(|TapState { x, y, up_time, .. }| {
                         let dx = (x - position.x).abs();
                         let dy = (y - position.y).abs();
-                        (dx * dx + dy * dy).sqrt() < 4.0 && (up_time + 500_000_000) > time
+                        (dx * dx + dy * dy).sqrt() < slop && (up_time + 500_000_000) > time
                     })
                 {
                     let count = tap.count + 1;
