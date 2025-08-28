@@ -1,7 +1,7 @@
 // Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! Support routines for converting pointer data from [`web-sys`].
+//! Support routines for converting pointer data from [`web_sys`].
 
 use ui_events::pointer::PointerButton;
 
