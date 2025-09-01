@@ -249,7 +249,7 @@ pub enum PointerGesture {
     Rotate(f32),
 }
 
-/// An event representing a scroll
+/// An event representing a gesture
 #[derive(Clone, Debug)]
 pub struct PointerGestureEvent {
     /// Identity of the pointer.
