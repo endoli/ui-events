@@ -17,7 +17,12 @@ This release has an [MSRV][] of 1.73.
 
 ### Added
 
-* `PointerId`, `PointerInfo`, `PointerUpdate`, and `PointerEvent` now have a `is_primary_pointer` method. ([#54][] by [@waywardmonkeys][])
+* `PointerId`, `PointerInfo`, `PointerUpdate`, and `PointerEvent` now have an `is_primary_pointer` method. ([#54][] by [@waywardmonkeys][])
+* `PointerGesture` and `PointerGestureEvent` types, with `Gesture` variant added to `PointerEvent`. ([#80][] by [@xorgy][] and [@arthur-fontaine][])
+
+### Changed
+
+* Convert `PointerEvent` struct variants (`Down`, `Up`, `Scroll`) to separate structs. ([#63][] by [@nicoburns][])
 
 ## [0.1.0][] - 2025-05-08
 
@@ -25,11 +30,17 @@ This release has an [MSRV][] of 1.73.
 
 This is the initial release.
 
+
+[@arthur-fontaine]: https://github.com/arthur-fontaine
+[@nicoburns]: https://github.com/nicoburns
 [@waywardmonkeys]: https://github.com/waywardmonkeys
+[@xorgy]: https://github.com/xorgy
 
 [#54]: https://github.com/endoli/ui-events/pull/54
+[#63]: https://github.com/endoli/ui-events/pull/63
+[#80]: https://github.com/endoli/ui-events/pull/80
 
 [Unreleased]: https://github.com/endoli/ui-events/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/linebender/color/releases/tag/v0.1.0
+[0.1.0]: https://github.com/endoli/ui-events/releases/tag/v0.1.0
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
