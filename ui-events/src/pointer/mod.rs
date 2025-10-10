@@ -12,7 +12,7 @@ use alloc::vec::Vec;
 
 use core::num::NonZeroU64;
 
-use dpi::{PhysicalPosition, PhysicalSize};
+use dpi::{LogicalPosition, PhysicalPosition, PhysicalSize};
 use keyboard_types::Modifiers;
 
 use crate::ScrollDelta;
@@ -163,6 +163,28 @@ pub struct PointerState {
     /// This is often controlled by something like a wheel on the
     /// barrel of an ‘airbrush’ style pen.
     pub tangential_pressure: f32,
+    /// The scale factor of the window/screen where this pointer event occurred.
+    pub scale_factor: f64,
+}
+
+impl PointerState {
+    /// Returns the pointer position as a logical `kurbo::Point`.
+    ///
+    /// The position is converted from physical pixels to logical coordinates
+    /// using the state's scale factor.
+    #[cfg(feature = "kurbo")]
+    pub fn point(&self) -> kurbo::Point {
+        let log = self.position.to_logical(self.scale_factor);
+        kurbo::Point { x: log.x, y: log.y }
+    }
+
+    /// Returns the pointer position in logical coordinates.
+    ///
+    /// This converts the physical position to logical coordinates using
+    /// the state's scale factor, providing DPI-independent positioning.
+    pub fn logical_position(&self) -> LogicalPosition<f64> {
+        self.position.to_logical(self.scale_factor)
+    }
 }
 
 impl Default for PointerState {
@@ -181,6 +203,7 @@ impl Default for PointerState {
             // No buttons pressed, therefore no pressure.
             pressure: 0.0,
             tangential_pressure: 0.0,
+            scale_factor: 1.,
         }
     }
 }
