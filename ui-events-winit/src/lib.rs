@@ -97,6 +97,7 @@ impl WindowEventReducer {
             .as_nanos() as u64;
 
         self.primary_state.time = time;
+        self.primary_state.scale_factor = scale_factor;
 
         match we {
             WindowEvent::ModifiersChanged(m) => {
