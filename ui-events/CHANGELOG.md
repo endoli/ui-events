@@ -18,6 +18,11 @@ This release has an [MSRV][] of 1.73.
 ### Added
 
 * `PointerId`, `PointerInfo`, `PointerUpdate`, and `PointerEvent` now have a `is_primary_pointer` method. ([#54][] by [@waywardmonkeys][])
+- `PointerId`, `PointerInfo`, `PointerUpdate`, and `PointerEvent` now have a `is_primary_pointer`
+  method. ([#54][] by [@waywardmonkeys][])
+- `scale_factor` field to `EventState` for convenient conversion between logical and device pixels
+- Optional `kurbo` integration behind the `kurbo` Cargo feature with convenience helpers for
+  converting DPI position to `kurbo::Point`
 
 ## [0.1.0][] - 2025-05-08
 

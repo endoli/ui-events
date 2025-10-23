@@ -17,6 +17,7 @@
 //! ## Features
 //!
 //! - `std` (enabled by default): Use the Rust standard library.
+//! - `kurbo`: Add convenience methods for easily converting dpi positions to kurbo `Point`s.
 //!
 //! [`ui-events-winit`]: https://docs.rs/ui-events-winit/
 //! [`winit`]: https://docs.rs/winit/
