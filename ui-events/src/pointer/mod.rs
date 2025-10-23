@@ -173,9 +173,18 @@ impl PointerState {
     /// The position is converted from physical pixels to logical coordinates
     /// using the state's scale factor.
     #[cfg(feature = "kurbo")]
-    pub fn point(&self) -> kurbo::Point {
+    pub fn logical_point(&self) -> kurbo::Point {
         let log = self.position.to_logical(self.scale_factor);
         kurbo::Point { x: log.x, y: log.y }
+    }
+
+    /// Returns the pointer position as a physical `kurbo::Point`.
+    #[cfg(feature = "kurbo")]
+    pub fn physical_point(&self) -> kurbo::Point {
+        kurbo::Point {
+            x: self.position.x,
+            y: self.position.y,
+        }
     }
 
     /// Returns the pointer position in logical coordinates.
