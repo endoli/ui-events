@@ -17,6 +17,7 @@
 //! ## Features
 //!
 //! - `std` (enabled by default): Use the Rust standard library.
+//! - `kurbo`: Add convenience methods for easily converting dpi positions to kurbo `Point`s.
 //!
 //! [`ui-events-winit`]: https://docs.rs/ui-events-winit/
 //! [`winit`]: https://docs.rs/winit/
@@ -29,7 +30,6 @@
 // Targeting e.g. 32-bit means structs containing usize can give false positives for 64-bit.
 #![cfg_attr(target_pointer_width = "64", warn(clippy::trivially_copy_pass_by_ref))]
 // END LINEBENDER LINT SET
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![no_std]
 
 pub mod keyboard;

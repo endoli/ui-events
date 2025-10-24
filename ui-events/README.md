@@ -38,6 +38,7 @@ For integration with [`winit`], use the companion [`ui-events-winit`] adapter cr
 ## Features
 
 - `std` (enabled by default): Use the Rust standard library.
+- `kurbo`: Add convenience methods for easily converting dpi positions to kurbo `Point`s.
 
 [`ui-events-winit`]: https://docs.rs/ui-events-winit/
 [`winit`]: https://docs.rs/winit/
@@ -46,8 +47,7 @@ For integration with [`winit`], use the companion [`ui-events-winit`] adapter cr
 
 ## Minimum supported Rust Version (MSRV)
 
-This version of UI Events has been verified to compile with **Rust 1.73** and later.
-The `no_std` build of this library needs **Rust 1.81** and later.
+This version of UI Events has been verified to compile with **Rust 1.82** and later.
 
 Future versions of UI Events might increase the Rust version requirement.
 It will not be treated as a breaking change and as such can even happen with small patch releases.

@@ -17,6 +17,7 @@ targets = []
 
 [features]
 default = ["std"]
+libm = []
 std = []
 
 [dependencies]
