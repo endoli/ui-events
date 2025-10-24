@@ -17,7 +17,6 @@
 // Targeting e.g. 32-bit means structs containing usize can give false positives for 64-bit.
 #![cfg_attr(target_pointer_width = "64", warn(clippy::trivially_copy_pass_by_ref))]
 // END LINEBENDER LINT SET
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![no_std]
 
 pub mod keyboard;
@@ -77,7 +76,10 @@ pub struct WindowEventReducer {
     first_instant: Option<Instant>,
 }
 
-#[allow(clippy::cast_possible_truncation)]
+#[allow(
+    clippy::cast_possible_truncation,
+    reason = "There is no alternative to truncation here."
+)]
 impl WindowEventReducer {
     /// Process a [`WindowEvent`].
     pub fn reduce(

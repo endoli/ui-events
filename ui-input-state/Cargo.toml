@@ -17,6 +17,7 @@ targets = []
 
 [features]
 default = ["std"]
+libm = ["ui-events/libm"]
 std = ["ui-events/std"]
 
 [dependencies]

@@ -77,9 +77,9 @@ pub fn from_winit_key(winit_key: winit::keyboard::Key) -> Key {
             WNK::Shift => NamedKey::Shift,
             WNK::Symbol => NamedKey::Symbol,
             WNK::SymbolLock => NamedKey::SymbolLock,
-            #[allow(deprecated)]
+            #[expect(deprecated, reason = "Deprecated but not unused.")]
             WNK::Meta => NamedKey::Super,
-            #[allow(deprecated)]
+            #[expect(deprecated, reason = "Deprecated but not unused.")]
             WNK::Hyper => NamedKey::Hyper,
             WNK::Super => NamedKey::Meta,
             WNK::Enter => NamedKey::Enter,
@@ -387,7 +387,7 @@ pub fn from_winit_code(physical_key: winit::keyboard::PhysicalKey) -> Code {
         PhysicalKey::Code(key_code) => match key_code {
             // Variants that don't match 1:1
             // With winit 0.31, these are renamed to swap the meta and super to match the W3C specs.
-            #[allow(deprecated)]
+            #[expect(deprecated, reason = "Deprecated but not unused.")]
             KC::Meta => Code::Super,
             KC::SuperLeft => Code::MetaLeft,
             KC::SuperRight => Code::MetaRight,
@@ -532,9 +532,9 @@ pub fn from_winit_code(physical_key: winit::keyboard::PhysicalKey) -> Code {
             KC::AudioVolumeMute => Code::AudioVolumeMute,
             KC::AudioVolumeUp => Code::AudioVolumeUp,
             KC::WakeUp => Code::WakeUp,
-            #[allow(deprecated)]
+            #[expect(deprecated, reason = "Deprecated but not unused.")]
             KC::Hyper => Code::Hyper,
-            #[allow(deprecated)]
+            #[expect(deprecated, reason = "Deprecated but not unused.")]
             KC::Turbo => Code::Turbo,
             KC::Abort => Code::Abort,
             KC::Resume => Code::Resume,

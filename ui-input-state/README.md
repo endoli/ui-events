@@ -32,8 +32,7 @@ UI Input State is a Rust crate which ...
 
 ## Minimum supported Rust Version (MSRV)
 
-This version of UI Input State has been verified to compile with **Rust 1.73** and later.
-The `no_std` build of this library needs **Rust 1.81** and later.
+This version of UI Input State has been verified to compile with **Rust 1.82** and later.
 
 Future versions of UI Input State might increase the Rust version requirement.
 It will not be treated as a breaking change and as such can even happen with small patch releases.
