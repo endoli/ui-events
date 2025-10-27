@@ -18,10 +18,11 @@ targets = []
 [features]
 default = ["std"]
 libm = ["ui-events/libm"]
-std = ["ui-events/std"]
+std = ["dpi/std", "ui-events/std"]
 
 [dependencies]
 ui-events.workspace = true
+dpi.workspace = true
 
 [lints]
 workspace = true
