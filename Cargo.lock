@@ -1185,6 +1185,7 @@ dependencies = [
 name = "ui-input-state"
 version = "0.1.0"
 dependencies = [
+ "dpi",
  "ui-events",
 ]
 
