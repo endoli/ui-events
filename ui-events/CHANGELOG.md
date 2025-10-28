@@ -8,10 +8,14 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 # Changelog
 
-The latest published UI Events release is [0.1.0](#010-2025-05-08) which was released on 2025-05-08.
-You can find its changes [documented below](#010-2025-05-08).
+The latest published UI Events release is [0.2.0](#020-2025-10-28) which was released on 2025-10-28.
+You can find its changes [documented below](#020-2025-10-28).
 
 ## [Unreleased]
+
+This release has an [MSRV][] of 1.82.
+
+## [0.2.0][] - 2025-10-28
 
 This release has an [MSRV][] of 1.82.
 
@@ -44,7 +48,8 @@ This is the initial release.
 [#80]: https://github.com/endoli/ui-events/pull/80
 [#82]: https://github.com/endoli/ui-events/pull/82
 
-[Unreleased]: https://github.com/endoli/ui-events/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/endoli/ui-events/compare/v0.2.0...HEAD
 [0.1.0]: https://github.com/endoli/ui-events/releases/tag/v0.1.0
+[0.2.0]: https://github.com/endoli/ui-events/releases/tag/v0.2.0
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
