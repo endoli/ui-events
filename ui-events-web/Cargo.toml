@@ -8,6 +8,7 @@ keywords = ["windowing", "input", "pointer"]
 categories = ["graphics", "gui"]
 repository.workspace = true
 rust-version.workspace = true
+publish = false
 
 [package.metadata.docs.rs]
 all-features = true
