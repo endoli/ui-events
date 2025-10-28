@@ -29,11 +29,39 @@ impl KeyboardState {
         self.just_pressed.iter().any(|KeyInfo(k, ..)| k == &key)
     }
 
+    /// Return `true` if a `Key::Character` matching `s` was pressed within the last frame
+    /// with any [`Location`].
+    ///
+    /// This is an optimization for matching [`Key::Character`] without allocating a [`String`].
+    /// If you are matching a [`Key::Named`] then use [`key_just_pressed`].
+    ///
+    /// [`key_just_pressed`]: KeyboardState::key_just_pressed
+    /// [`String`]: alloc::string::String
+    pub fn key_str_just_pressed(&self, s: &str) -> bool {
+        self.just_pressed
+            .iter()
+            .any(|KeyInfo(k, ..)| matches!(k, Key::Character(c) if c == s))
+    }
+
     /// Return `true` if the `key` was pressed within the last frame with `location`.
     pub fn key_just_pressed_location(&self, key: Key, location: Location) -> bool {
         self.just_pressed
             .iter()
             .any(|KeyInfo(k, l, _)| k == &key && l == &location)
+    }
+
+    /// Return `true` if a `Key::Character` matching `s` was pressed within the last frame
+    /// with `location`.
+    ///
+    /// This is an optimization for matching [`Key::Character`] without allocating a [`String`].
+    /// If you are matching a [`Key::Named`] then use [`key_just_pressed_location`].
+    ///
+    /// [`key_just_pressed_location`]: KeyboardState::key_just_pressed_location
+    /// [`String`]: alloc::string::String
+    pub fn key_str_just_pressed_location(&self, s: &str, location: Location) -> bool {
+        self.just_pressed
+            .iter()
+            .any(|KeyInfo(k, l, ..)| l == &location && matches!(k, Key::Character(c) if c == s))
     }
 
     /// Return `true` if the `Code` was pressed within the last frame.
@@ -47,11 +75,39 @@ impl KeyboardState {
         self.just_released.iter().any(|KeyInfo(k, ..)| k == &key)
     }
 
+    /// Return `true` if a `Key::Character` matching `s` was released within the last frame
+    /// with any [`Location`].
+    ///
+    /// This is an optimization for matching [`Key::Character`] without allocating a [`String`].
+    /// If you are matching a [`Key::Named`] then use [`key_just_released`].
+    ///
+    /// [`key_just_released`]: KeyboardState::key_just_released
+    /// [`String`]: alloc::string::String
+    pub fn key_str_just_released(&self, s: &str) -> bool {
+        self.just_released
+            .iter()
+            .any(|KeyInfo(k, ..)| matches!(k, Key::Character(c) if c == s))
+    }
+
     /// Return `true` if the `key` was released within the last frame with `location`.
     pub fn key_just_released_location(&self, key: Key, location: Location) -> bool {
         self.just_released
             .iter()
             .any(|KeyInfo(k, l, _)| k == &key && l == &location)
+    }
+
+    /// Return `true` if a `Key::Character` matching `s` was released within the last frame
+    /// with `location`.
+    ///
+    /// This is an optimization for matching [`Key::Character`] without allocating a [`String`].
+    /// If you are matching a [`Key::Named`] then use [`key_just_released_location`].
+    ///
+    /// [`key_just_released_location`]: KeyboardState::key_just_released_location
+    /// [`String`]: alloc::string::String
+    pub fn key_str_just_released_location(&self, s: &str, location: Location) -> bool {
+        self.just_released
+            .iter()
+            .any(|KeyInfo(k, l, ..)| l == &location && matches!(k, Key::Character(c) if c == s))
     }
 
     /// Return `true` if the `Code` was released within the last frame.
@@ -65,15 +121,53 @@ impl KeyboardState {
     }
 
     /// Return `true` if the `key` is currently pressed with any [`Location`].
+    ///
+    /// For a [`Key::Character`], you can use [`key_str_down`] to avoid allocating
+    /// a [`String`] each time you check.
+    ///
+    /// [`key_str_down`]: KeyboardState::key_str_down
+    /// [`String`]: alloc::string::String
     pub fn key_down(&self, key: Key) -> bool {
         self.down.iter().any(|KeyInfo(k, ..)| k == &key)
     }
 
+    /// Return `true` if a `Key::Character` matching `s` is currently pressed with any [`Location`].
+    ///
+    /// This is an optimization for matching [`Key::Character`] without allocating a [`String`].
+    /// If you are matching a [`Key::Named`] then use [`key_down`].
+    ///
+    /// [`key_down`]: KeyboardState::key_down
+    /// [`String`]: alloc::string::String
+    pub fn key_str_down(&self, s: &str) -> bool {
+        self.down
+            .iter()
+            .any(|KeyInfo(k, ..)| matches!(k, Key::Character(c) if c == s))
+    }
+
     /// Return `true` if the `key` is currently pressed with `location`.
+    ///
+    /// For a [`Key::Character`], you can use [`key_str_down_location`] to avoid allocating
+    /// a [`String`] each time you check.
+    ///
+    /// [`key_str_down_location`]: KeyboardState::key_str_down_location
+    /// [`String`]: alloc::string::String
     pub fn key_down_location(&self, key: Key, location: Location) -> bool {
         self.down
             .iter()
             .any(|KeyInfo(k, l, _)| k == &key && l == &location)
+    }
+
+    /// Return `true` if a `Key::Character` matching `s` is currently pressed with `location`.
+    ///
+    /// This is an optimization for matching [`Key::Character`] without allocating a [`String`].
+    /// If you are matching a [`Key::Named`] then use [`key_down`].
+    ///
+    /// [`key_down`]: KeyboardState::key_down_location.
+    /// [`String`]: alloc::string::String
+    pub fn key_str_down_location(&self, s: &str, location: Location) -> bool {
+        self.down
+            .iter()
+            .any(|KeyInfo(k, l, ..)| l == &location && matches!(k, Key::Character(c) if c == s))
     }
 
     /// Return `true` if the `code` is currently pressed with any [`Location`].
@@ -142,13 +236,28 @@ mod tests {
         state.process_keyboard_event(make_key_down_event(Key::Character("A".into())));
 
         assert!(state.key_just_pressed(Key::Character("A".into())));
+        assert!(state.key_str_just_pressed("A"));
+        assert!(state.key_str_just_pressed_location("A", Location::Standard));
+        assert!(!state.key_str_just_pressed_location("A", Location::Left));
         assert!(state.key_down(Key::Character("A".into())));
+        assert!(state.key_str_down("A"));
+        assert!(state.key_str_down_location("A", Location::Standard));
+        assert!(!state.key_str_down_location("A", Location::Left));
         assert!(!state.key_just_released(Key::Character("A".into())));
+        assert!(!state.key_str_just_released("A"));
+        assert!(!state.key_str_just_released_location("A", Location::Standard));
+        assert!(!state.key_str_just_released_location("A", Location::Left));
 
         state.clear_frame();
 
         assert!(!state.key_just_pressed(Key::Character("A".into())));
+        assert!(!state.key_str_just_pressed("A"));
+        assert!(!state.key_str_just_pressed_location("A", Location::Standard));
+        assert!(!state.key_str_just_pressed_location("A", Location::Left));
         assert!(state.key_down(Key::Character("A".into())));
+        assert!(state.key_str_down("A"));
+        assert!(state.key_str_down_location("A", Location::Standard));
+        assert!(!state.key_str_down_location("A", Location::Left));
     }
 
     #[test]
@@ -158,8 +267,17 @@ mod tests {
         state.process_keyboard_event(make_key_up_event(Key::Character("A".into())));
 
         assert!(state.key_just_pressed(Key::Character("A".into())));
+        assert!(state.key_str_just_pressed("A"));
+        assert!(state.key_str_just_pressed_location("A", Location::Standard));
+        assert!(!state.key_str_just_pressed_location("A", Location::Left));
         assert!(state.key_just_released(Key::Character("A".into())));
+        assert!(state.key_str_just_released("A"));
+        assert!(state.key_str_just_released_location("A", Location::Standard));
+        assert!(!state.key_str_just_released_location("A", Location::Left));
         assert!(!state.key_down(Key::Character("A".into())));
+        assert!(!state.key_str_down("A"));
+        assert!(!state.key_str_down_location("A", Location::Standard));
+        assert!(!state.key_str_down_location("A", Location::Left));
     }
 
     #[test]
@@ -170,8 +288,17 @@ mod tests {
         state.process_keyboard_event(make_key_up_event(Key::Character("A".into())));
 
         assert!(!state.key_just_pressed(Key::Character("A".into())));
+        assert!(!state.key_str_just_pressed("A"));
+        assert!(!state.key_str_just_pressed_location("A", Location::Standard));
+        assert!(!state.key_str_just_pressed_location("A", Location::Left));
         assert!(state.key_just_released(Key::Character("A".into())));
+        assert!(state.key_str_just_released("A"));
+        assert!(state.key_str_just_released_location("A", Location::Standard));
+        assert!(!state.key_str_just_released_location("A", Location::Left));
         assert!(!state.key_down(Key::Character("A".into())));
+        assert!(!state.key_str_down("A"));
+        assert!(!state.key_str_down_location("A", Location::Standard));
+        assert!(!state.key_str_down_location("A", Location::Left));
     }
 
     fn make_code_down_event(code: Code) -> KeyboardEvent {
