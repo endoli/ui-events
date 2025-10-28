@@ -18,6 +18,6 @@ This release has an [MSRV][] of 1.73.
 This is the initial release.
 
 [Unreleased]: https://github.com/endoli/ui-events/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/linebender/color/releases/tag/v0.1.0
+[0.1.0]: https://github.com/endoli/ui-events/releases/tag/v0.1.0
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
