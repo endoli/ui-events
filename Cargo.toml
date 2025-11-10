@@ -7,6 +7,7 @@ members = [
     "ui-input-state",
     "ui-theme",
     "examples/simple",
+    "examples/simple_web",
 ]
 
 [workspace.package]
@@ -74,4 +75,5 @@ clippy.wildcard_dependencies = "warn"
 [workspace.dependencies]
 dpi = { version = "0.1.2", default-features = false }
 ui-events = { version = "0.2.0", path = "ui-events", default-features = false }
+ui-events-web = { version = "0.2.0", path = "ui-events-web" }
 web-time = "1.1.0"
