@@ -1,6 +1,49 @@
 // Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+//! # Primary pointer state across frames.
+//!
+//! `PrimaryPointerState` maintains the current pointer state along with
+//! per-frame button transitions, coalesced historical states for the current
+//! frame, and any predicted states provided by the backend. Only events from
+//! the primary pointer are processed (see `ui-events` primary pointer semantics).
+//!
+//! Feed it `ui-events` pointer events as they arrive; query it during your
+//! update; and call [`clear_frame`](PrimaryPointerState::clear_frame) at the
+//! end of the frame.
+//!
+//! ## Example:
+//!
+//! ```no_run
+//! use ui_input_state::PrimaryPointerState;
+//! use ui_events::pointer::{
+//!     PointerEvent, PointerButtonEvent, PointerButton, PointerInfo, PointerType, PointerId,
+//!     PointerState, PointerUpdate,
+//! };
+//! use dpi::PhysicalPosition;
+//!
+//! let mut ps = PrimaryPointerState::default();
+//! // Synthesize a move event
+//! let current = PointerState {
+//!     time: 1,
+//!     position: PhysicalPosition { x: 10.0, y: 20.0 },
+//!     scale_factor: 2.0,
+//!     ..Default::default()
+//! };
+//! let ev = PointerEvent::Move(PointerUpdate {
+//!     pointer: PointerInfo {
+//!         pointer_id: Some(PointerId::PRIMARY),
+//!         persistent_device_id: None,
+//!         pointer_type: PointerType::Mouse,
+//!     },
+//!     current,
+//!     coalesced: vec![],
+//!     predicted: vec![],
+//! });
+//! ps.process_pointer_event(ev);
+//! let lp = ps.current_logical_position();
+//! assert_eq!(lp.x, 5.0);
+//! ```
 extern crate alloc;
 use alloc::vec::Vec;
 

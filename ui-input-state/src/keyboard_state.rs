@@ -1,6 +1,32 @@
 // Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+//! # Keyboard state across frames.
+//!
+//! `KeyboardState` tracks per-frame transitions (just pressed/released), keys
+//! currently held down, and the active [`Modifiers`]. Feed it
+//! [`KeyboardEvent`] values as they arrive; query it during your update pass;
+//! call [`clear_frame`](KeyboardState::clear_frame) at the end of the frame.
+//!
+//! ## Example:
+//!
+//! ```no_run
+//! use ui_input_state::KeyboardState;
+//! use ui_events::keyboard::{KeyboardEvent, KeyState, Key, Location, Code, Modifiers};
+//!
+//! let mut ks = KeyboardState::default();
+//! let ev = KeyboardEvent {
+//!     state: KeyState::Down,
+//!     key: Key::Character("z".into()),
+//!     location: Location::Standard,
+//!     code: Code::KeyZ,
+//!     modifiers: Modifiers::empty(),
+//!     is_composing: false,
+//!     repeat: false,
+//! };
+//! ks.process_keyboard_event(ev);
+//! assert!(ks.key_str_just_pressed("z"));
+//! ```
 use ui_events::keyboard::{Code, Key, KeyState, KeyboardEvent, Location, Modifiers};
 
 extern crate alloc;

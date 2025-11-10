@@ -1,7 +1,33 @@
 // Copyright 2025 the UI Events Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! Pointer Event Types
+//! # Pointer event types
+//!
+//! This module contains the core types for representing pointer input across
+//! mice, pens, and touch. These types are transport-agnostic and can be
+//! produced from platform backends (e.g. winit, web) and consumed in UI code.
+//!
+//! ## Key ideas:
+//!
+//! - [`PointerId`] and [`PersistentDeviceId`] help correlate states over time.
+//! - [`PointerState`] carries position, pressure, tilt, modifiers and more.
+//! - [`PointerEvent`] is the main event enum: down/up/move/enter/leave/scroll/gesture.
+//! - [`PointerInfo::is_primary_pointer`] is a convenience for primary interactions.
+//!
+//! ## Example: checking for primary pointer and using logical coordinates
+//!
+//! ```
+//! use ui_events::pointer::{PointerEvent, PointerUpdate};
+//!
+//! fn handle(ev: PointerEvent) {
+//!     if let PointerEvent::Move(PointerUpdate { pointer, current, .. }) = ev {
+//!         if pointer.is_primary_pointer() {
+//!             let lp = current.logical_position();
+//!             let _ = (lp.x, lp.y);
+//!         }
+//!     }
+//! }
+//! ```
 
 mod buttons;
 
