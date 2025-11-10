@@ -20,6 +20,7 @@
 //! For integrations, see the adapter crates:
 //!
 //! - [`ui-events-winit`]: Convert between `winit` and `ui-events`.
+//! - [`ui-events-web`]: Convert between Web (`web-sys`) DOM events and `ui-events`.
 //!
 //! ## Coordinate system and units
 //!
@@ -103,10 +104,12 @@
 //! ## See also
 //!
 //! - [`ui-events-winit`]
+//! - [`ui-events-web`]
 //! - [`keyboard-types`]
 //!
 //! [`keyboard-types`]: https://docs.rs/keyboard-types/
 //! [`ui-events-winit`]: https://docs.rs/ui-events-winit/
+//! [`ui-events-web`]: https://docs.rs/ui-events-web/
 //! [`winit`]: https://docs.rs/winit/
 // LINEBENDER LINT SET - lib.rs - v3
 // See https://linebender.org/wiki/canonical-lints/
