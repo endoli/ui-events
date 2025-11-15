@@ -37,4 +37,5 @@ pub mod pointer;
 
 mod scroll;
 
+pub use dpi;
 pub use scroll::ScrollDelta;
