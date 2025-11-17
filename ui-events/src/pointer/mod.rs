@@ -64,6 +64,12 @@ impl PointerId {
     pub fn is_primary_pointer(self) -> bool {
         self == Self::PRIMARY
     }
+
+    /// Returns the inner `NonZeroU64` value.
+    #[inline(always)]
+    pub fn get_inner(self) -> NonZeroU64 {
+        self.0
+    }
 }
 
 /// An identifier for the pointing device that is stable across the session.
