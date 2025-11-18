@@ -15,6 +15,10 @@ You can find its changes [documented below](#020-2025-10-28).
 
 This release has an [MSRV][] of 1.82.
 
+### Added
+
+* `PointerId::get_inner()` method to access the inner `NonZeroU64` value.
+
 ## [0.2.0][] - 2025-10-28
 
 This release has an [MSRV][] of 1.82.
