@@ -21,7 +21,7 @@ std = []
 
 [dependencies]
 ui-events = { workspace = true, features = ["std"] }
-winit = "0.30.10"
+winit = {git = "https://github.com/rust-windowing/winit", rev = "d837c88855a4abfee7c21c5f7fd756ac100c5a7a"}
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-time.workspace = true
