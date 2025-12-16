@@ -321,7 +321,6 @@ impl TapCounter {
                     tap.count = count;
                     tap.pointer_id = pointer_id;
                     tap.down_time = time;
-                    tap.up_time = time;
                     tap.x = position.x;
                     tap.y = position.y;
                 } else {
