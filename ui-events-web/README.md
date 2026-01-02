@@ -39,6 +39,8 @@ Pointer Events (mouse, touch, pen) and keyboard.
 ## Pointer (Pointer Events)
 
 - One‑shot DOM conversion: [`pointer::pointer_event_from_dom_event`]
+- Multi-touch aware DOM conversion (may return multiple events):
+  [`pointer::pointer_events_from_dom_event`]
 - Per‑event helpers (preferred):
   [`pointer::down_from_pointer_event`], [`pointer::up_from_pointer_event`],
   [`pointer::move_from_pointer_event`], [`pointer::enter_from_pointer_event`],
@@ -56,6 +58,8 @@ Pointer Events (mouse, touch, pen) and keyboard.
 - Positions use `clientX` / `clientY` scaled by `Options::scale_factor`. Pass the
   current device-pixel-ratio for physical pixels.
 - Coalesced and predicted move samples are opt‑in via `Options`.
+- Touch events (`touchstart`/`touchmove`/`touchend`/`touchcancel`) may correspond to multiple
+  changed touches; use `pointer_events_from_dom_event` to receive all of them.
 - Keyboard: unknown `key`/`code` map to `Unidentified`; `is_composing` reflects the DOM flag.
 
 ## Example

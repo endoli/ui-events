@@ -3,6 +3,7 @@
 
 //! Support routines for converting pointer data from [`web_sys`].
 
+use alloc::vec;
 use alloc::vec::Vec;
 
 use dpi::{PhysicalPosition, PhysicalSize};
@@ -14,7 +15,10 @@ use ui_events::pointer::{
 };
 use ui_events::ScrollDelta;
 use web_sys::wasm_bindgen::JsCast;
-use web_sys::{Element, Event, MouseEvent, PointerEvent as WebPointerEvent, WheelEvent};
+use web_sys::{
+    Element, Event, MouseEvent, PointerEvent as WebPointerEvent, Touch, TouchEvent, TouchList,
+    WheelEvent,
+};
 
 #[inline]
 #[expect(
@@ -506,34 +510,248 @@ pub fn cancel_from_pointer_event(e: &WebPointerEvent) -> PointerEvent {
     PointerEvent::Cancel(pointer_info_from_web_pointer(e))
 }
 
-/// Convert a DOM event (Mouse/Pointer/Wheel) into a `ui-events` [`PointerEvent`]
-/// with options to control conversion.
-pub fn pointer_event_from_dom_event(ev: &Event, opts: &Options) -> Option<PointerEvent> {
+/// Convert a DOM `TouchEvent` into zero or more `ui-events` [`PointerEvent`]s.
+///
+/// Browser touch events can report multiple changed touches at once, so this returns a `Vec`.
+/// For `touchstart`, `touchmove`, and `touchend`, the returned events correspond to the
+/// event's `changedTouches` list.
+///
+/// For `touchcancel`, the returned events are [`PointerEvent::Cancel`], which do not include
+/// pointer state.
+pub fn pointer_events_from_touch_event(ev: &TouchEvent, opts: &Options) -> Vec<PointerEvent> {
+    let time_ns = ms_to_ns_u64(ev.time_stamp());
+    let modifiers = modifiers_from_touch(ev);
+
+    let touch_count = pointer_attach_count_from_active_touches(ev.touches().length());
+    let primary_identifier = min_touch_identifier_from_event(ev);
+
+    let type_ = ev.type_();
+    let changed = ev.changed_touches();
+
+    let mut out = Vec::new();
+    let len = changed.length();
+    for i in 0..len {
+        let Some(touch) = changed.item(i) else {
+            continue;
+        };
+        let pointer = pointer_info_from_touch(&touch, primary_identifier);
+        match type_.as_str() {
+            "touchstart" => out.push(PointerEvent::Down(PointerButtonEvent {
+                button: None,
+                pointer,
+                state: state_from_touch(&touch, time_ns, modifiers, touch_count, opts.scale_factor),
+            })),
+            "touchmove" => out.push(PointerEvent::Move(PointerUpdate {
+                pointer,
+                current: state_from_touch(
+                    &touch,
+                    time_ns,
+                    modifiers,
+                    touch_count,
+                    opts.scale_factor,
+                ),
+                coalesced: Vec::new(),
+                predicted: Vec::new(),
+            })),
+            "touchend" => out.push(PointerEvent::Up(PointerButtonEvent {
+                button: None,
+                pointer,
+                state: state_from_touch_end(
+                    &touch,
+                    time_ns,
+                    modifiers,
+                    touch_count,
+                    opts.scale_factor,
+                ),
+            })),
+            "touchcancel" => out.push(PointerEvent::Cancel(pointer)),
+            _ => {}
+        }
+    }
+    out
+}
+
+fn modifiers_from_touch(e: &TouchEvent) -> Modifiers {
+    let mut m = Modifiers::default();
+    if e.ctrl_key() {
+        m.insert(Modifiers::CONTROL);
+    }
+    if e.alt_key() {
+        m.insert(Modifiers::ALT);
+    }
+    if e.shift_key() {
+        m.insert(Modifiers::SHIFT);
+    }
+    if e.meta_key() {
+        m.insert(Modifiers::META);
+    }
+    m
+}
+
+fn min_touch_identifier_from_event(ev: &TouchEvent) -> Option<u64> {
+    let mut min = min_touch_identifier(&ev.touches())?;
+    if let Some(changed_min) = min_touch_identifier(&ev.changed_touches()) {
+        min = min.min(changed_min);
+    }
+    Some(min)
+}
+
+fn min_touch_identifier(list: &TouchList) -> Option<u64> {
+    let mut min: Option<u64> = None;
+    let len = list.length();
+    for i in 0..len {
+        let Some(t) = list.item(i) else {
+            continue;
+        };
+        let id = touch_identifier_u64(&t)?;
+        min = Some(min.map_or(id, |m| m.min(id)));
+    }
+    min
+}
+
+fn touch_identifier_u64(touch: &Touch) -> Option<u64> {
+    let id = touch.identifier();
+    if id < 0 {
+        return None;
+    }
+    Some(id as u64)
+}
+
+fn pointer_id_from_touch_identifier(id: i32, primary_identifier: Option<u64>) -> Option<PointerId> {
+    if id < 0 {
+        return None;
+    }
+    let id_u64 = id as u64;
+    if primary_identifier.is_some_and(|p| p == id_u64) {
+        return Some(PointerId::PRIMARY);
+    }
+    PointerId::new(id_u64.saturating_add(2))
+}
+
+fn pointer_attach_count_from_active_touches(active_touches: u32) -> u8 {
+    active_touches.min(255) as u8
+}
+
+fn pointer_info_from_touch(touch: &Touch, primary_identifier: Option<u64>) -> PointerInfo {
+    PointerInfo {
+        pointer_id: pointer_id_from_touch_identifier(touch.identifier(), primary_identifier),
+        persistent_device_id: None,
+        pointer_type: PointerType::Touch,
+    }
+}
+
+fn state_from_touch(
+    touch: &Touch,
+    time_ns: u64,
+    modifiers: Modifiers,
+    touch_count: u8,
+    scale_factor: f64,
+) -> PointerState {
+    let css_x = touch.client_x() as f64;
+    let css_y = touch.client_y() as f64;
+
+    // Touch.radiusX/Y are radii in CSS pixels; `PointerState` stores a size.
+    let width_css = (touch.radius_x() as f64 * 2.0).max(1.0);
+    let height_css = (touch.radius_y() as f64 * 2.0).max(1.0);
+
+    let pressure = {
+        let f = touch.force();
+        if f > 0.0 {
+            f
+        } else {
+            0.5
+        }
+    };
+
+    PointerState {
+        time: time_ns,
+        position: PhysicalPosition {
+            x: css_x * scale_factor,
+            y: css_y * scale_factor,
+        },
+        buttons: PointerButtons::default(),
+        modifiers,
+        count: touch_count,
+        contact_geometry: PhysicalSize {
+            width: width_css * scale_factor,
+            height: height_css * scale_factor,
+        },
+        orientation: Default::default(),
+        pressure,
+        tangential_pressure: 0.0,
+        scale_factor,
+    }
+}
+
+fn state_from_touch_end(
+    touch: &Touch,
+    time_ns: u64,
+    modifiers: Modifiers,
+    touch_count: u8,
+    scale_factor: f64,
+) -> PointerState {
+    let mut s = state_from_touch(touch, time_ns, modifiers, touch_count, scale_factor);
+    s.pressure = 0.0;
+    s
+}
+
+/// Convert a DOM event (Touch/Mouse/Pointer/Wheel) into zero or more `ui-events`
+/// [`PointerEvent`]s with options to control conversion.
+pub fn pointer_events_from_dom_event(ev: &Event, opts: &Options) -> Vec<PointerEvent> {
+    if let Some(te) = ev.dyn_ref::<TouchEvent>() {
+        let out = pointer_events_from_touch_event(te, opts);
+        if !out.is_empty() {
+            return out;
+        }
+    }
+
     if let Some(wheel) = ev.dyn_ref::<WheelEvent>() {
-        return Some(scroll_from_wheel_event(wheel, opts.scale_factor));
+        return vec![scroll_from_wheel_event(wheel, opts.scale_factor)];
     }
     if let Some(pe) = ev.dyn_ref::<WebPointerEvent>() {
-        return Some(match pe.type_().as_str() {
-            "pointerdown" => down_from_pointer_event(pe, opts.scale_factor),
-            "pointerup" => up_from_pointer_event(pe, opts.scale_factor),
-            "pointermove" => move_from_pointer_event(pe, opts),
-            "pointerenter" => enter_from_pointer_event(pe),
-            "pointerleave" => leave_from_pointer_event(pe),
-            "pointercancel" => cancel_from_pointer_event(pe),
-            _ => return None,
-        });
+        let Some(out) = (match pe.type_().as_str() {
+            "pointerdown" => Some(down_from_pointer_event(pe, opts.scale_factor)),
+            "pointerup" => Some(up_from_pointer_event(pe, opts.scale_factor)),
+            "pointermove" => Some(move_from_pointer_event(pe, opts)),
+            "pointerenter" => Some(enter_from_pointer_event(pe)),
+            "pointerleave" => Some(leave_from_pointer_event(pe)),
+            "pointercancel" => Some(cancel_from_pointer_event(pe)),
+            _ => None,
+        }) else {
+            return Vec::new();
+        };
+        return vec![out];
     }
     if let Some(me) = ev.dyn_ref::<MouseEvent>() {
-        return Some(match me.type_().as_str() {
-            "mousedown" => down_from_mouse_event(me, opts.scale_factor),
-            "mouseup" => up_from_mouse_event(me, opts.scale_factor),
-            "mousemove" => move_from_mouse_event(me, opts.scale_factor),
-            "mouseenter" => enter_from_mouse_event(me),
-            "mouseleave" => leave_from_mouse_event(me),
-            _ => return None,
-        });
+        let Some(out) = (match me.type_().as_str() {
+            "mousedown" => Some(down_from_mouse_event(me, opts.scale_factor)),
+            "mouseup" => Some(up_from_mouse_event(me, opts.scale_factor)),
+            "mousemove" => Some(move_from_mouse_event(me, opts.scale_factor)),
+            "mouseenter" => Some(enter_from_mouse_event(me)),
+            "mouseleave" => Some(leave_from_mouse_event(me)),
+            _ => None,
+        }) else {
+            return Vec::new();
+        };
+        return vec![out];
     }
-    None
+    Vec::new()
+}
+
+/// Convert a DOM event (Mouse/Pointer/Wheel) into a `ui-events` [`PointerEvent`]
+/// with options to control conversion.
+///
+/// For multi-touch events, this returns the primary pointer's event when possible,
+/// otherwise it returns an arbitrary changed touch.
+pub fn pointer_event_from_dom_event(ev: &Event, opts: &Options) -> Option<PointerEvent> {
+    let mut events = pointer_events_from_dom_event(ev, opts);
+    if events.is_empty() {
+        return None;
+    }
+    if let Some(primary_idx) = events.iter().position(PointerEvent::is_primary_pointer) {
+        return Some(events.swap_remove(primary_idx));
+    }
+    events.into_iter().next()
 }
 
 /// Set pointer capture on an element using the id from a `PointerEvent`.
@@ -555,4 +773,39 @@ pub fn release_pointer_capture(
 /// Query whether an element currently has capture for this pointer id.
 pub fn has_pointer_capture(el: &Element, e: &WebPointerEvent) -> bool {
     el.has_pointer_capture(e.pointer_id())
+}
+
+#[cfg(test)]
+mod touch_tests {
+    use super::*;
+
+    #[test]
+    fn touch_identifier_to_pointer_id_mapping() {
+        assert_eq!(
+            pointer_id_from_touch_identifier(0, Some(0)),
+            Some(PointerId::PRIMARY)
+        );
+        assert_eq!(
+            pointer_id_from_touch_identifier(0, Some(1)),
+            PointerId::new(2)
+        );
+        assert_eq!(
+            pointer_id_from_touch_identifier(1, Some(1)),
+            Some(PointerId::PRIMARY)
+        );
+        assert_eq!(
+            pointer_id_from_touch_identifier(1, Some(0)),
+            PointerId::new(3)
+        );
+        assert_eq!(pointer_id_from_touch_identifier(-1, Some(0)), None);
+    }
+
+    #[test]
+    fn touch_count_clamps_to_u8() {
+        assert_eq!(pointer_attach_count_from_active_touches(0), 0);
+        assert_eq!(pointer_attach_count_from_active_touches(1), 1);
+        assert_eq!(pointer_attach_count_from_active_touches(255), 255);
+        assert_eq!(pointer_attach_count_from_active_touches(256), 255);
+        assert_eq!(pointer_attach_count_from_active_touches(u32::MAX), 255);
+    }
 }
