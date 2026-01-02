@@ -418,8 +418,7 @@ pub fn move_from_pointer_event(e: &WebPointerEvent, opts: &Options) -> PointerEv
     let current = state_from_pointer_event(e, opts.scale_factor);
 
     let coalesced_states = if opts.collect_coalesced {
-        let arr: Array = e.get_coalesced_events();
-        collect_states_from_array(&arr, opts.scale_factor)
+        get_coalesced_events_safe(e, opts.scale_factor)
     } else {
         Vec::new()
     };
@@ -448,6 +447,27 @@ fn collect_states_from_array(arr: &Array, scale_factor: f64) -> Vec<PointerState
         }
     }
     out
+}
+
+fn get_coalesced_events_safe(e: &WebPointerEvent, scale_factor: f64) -> Vec<PointerState> {
+    let obj = e.as_ref();
+    let Ok(v) = Reflect::get(
+        obj,
+        &web_sys::wasm_bindgen::JsValue::from_str("getCoalescedEvents"),
+    ) else {
+        return Vec::new();
+    };
+    if !v.is_function() {
+        return Vec::new();
+    }
+    let f: Function = v.unchecked_into();
+    let Ok(jsarr) = f.call0(obj) else {
+        return Vec::new();
+    };
+    let Ok(arr) = jsarr.dyn_into::<Array>() else {
+        return Vec::new();
+    };
+    collect_states_from_array(&arr, scale_factor)
 }
 
 fn get_predicted_events_safe(e: &WebPointerEvent, scale_factor: f64) -> Vec<PointerState> {
