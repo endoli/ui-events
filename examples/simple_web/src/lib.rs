@@ -78,8 +78,9 @@ fn setup_canvas(win: &Window) -> (HtmlCanvasElement, CanvasRenderingContext2d) {
 
 fn resize_canvas(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, win: &Window) {
     let dpr = win.device_pixel_ratio();
-    let w = win.inner_width().unwrap().as_f64().unwrap();
-    let h = win.inner_height().unwrap().as_f64().unwrap();
+    let rect = canvas.get_bounding_client_rect();
+    let w = rect.width();
+    let h = rect.height();
     #[expect(
         clippy::cast_possible_truncation,
         reason = "Canvas backing store size intentionally truncated to u32 pixels"

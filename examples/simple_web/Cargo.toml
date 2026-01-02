@@ -16,6 +16,7 @@ ui-events-web = { workspace = true }
 web-sys = { version = "0.3.82", features = [
     "Window",
     "Document",
+    "DomRect",
     "EventTarget",
     "HtmlElement",
     "HtmlInputElement",
