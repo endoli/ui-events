@@ -27,6 +27,9 @@ js-sys = { version = "0.3.82", default-features = false }
 web-sys = { version = "0.3.82", default-features = false, features = [
     "KeyboardEvent",
     "MouseEvent",
+    "Touch",
+    "TouchEvent",
+    "TouchList",
     "WheelEvent",
     "PointerEvent",
     "Element",

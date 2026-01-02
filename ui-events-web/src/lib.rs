@@ -16,6 +16,8 @@
 //! ## Pointer (Pointer Events)
 //!
 //! - One‑shot DOM conversion: [`pointer::pointer_event_from_dom_event`]
+//! - Multi-touch aware DOM conversion (may return multiple events):
+//!   [`pointer::pointer_events_from_dom_event`]
 //! - Per‑event helpers (preferred):
 //!   [`pointer::down_from_pointer_event`], [`pointer::up_from_pointer_event`],
 //!   [`pointer::move_from_pointer_event`], [`pointer::enter_from_pointer_event`],
@@ -33,6 +35,8 @@
 //! - Positions use `clientX` / `clientY` scaled by `Options::scale_factor`. Pass the
 //!   current device-pixel-ratio for physical pixels.
 //! - Coalesced and predicted move samples are opt‑in via `Options`.
+//! - Touch events (`touchstart`/`touchmove`/`touchend`/`touchcancel`) may correspond to multiple
+//!   changed touches; use `pointer_events_from_dom_event` to receive all of them.
 //! - Keyboard: unknown `key`/`code` map to `Unidentified`; `is_composing` reflects the DOM flag.
 //!
 //! ## Example
@@ -87,11 +91,3 @@ extern crate alloc;
 
 pub mod keyboard;
 pub mod pointer;
-
-#[cfg(test)]
-mod tests {
-    // CI will fail unless cargo nextest can execute at least one test per workspace.
-    // Delete this dummy test once we have an actual real test.
-    #[test]
-    fn dummy_test_until_we_have_a_real_test() {}
-}
