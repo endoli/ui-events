@@ -43,8 +43,10 @@ fn f64_to_f32_delta(v: f64) -> f32 {
 pub fn try_from_web_button(b: i16) -> Option<PointerButton> {
     Some(match b {
         0 => PointerButton::Primary,
-        1 => PointerButton::Secondary,
-        2 => PointerButton::Auxiliary,
+        // https://www.w3.org/TR/uievents/#dom-mouseevent-button
+        // 1 = auxiliary (middle), 2 = secondary (right)
+        1 => PointerButton::Auxiliary,
+        2 => PointerButton::Secondary,
         3 => PointerButton::X1,
         4 => PointerButton::X2,
         5 => PointerButton::PenEraser,
@@ -78,6 +80,23 @@ pub fn try_from_web_button(b: i16) -> Option<PointerButton> {
             return None;
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ui_events::pointer::PointerButton;
+
+    #[test]
+    fn web_mouse_button_mapping_matches_dom_spec() {
+        assert_eq!(try_from_web_button(0), Some(PointerButton::Primary));
+        assert_eq!(try_from_web_button(1), Some(PointerButton::Auxiliary));
+        assert_eq!(try_from_web_button(2), Some(PointerButton::Secondary));
+        assert_eq!(try_from_web_button(3), Some(PointerButton::X1));
+        assert_eq!(try_from_web_button(4), Some(PointerButton::X2));
+        assert_eq!(try_from_web_button(-1), None);
+        assert_eq!(try_from_web_button(32), None);
+    }
 }
 
 /// Convert a DOM `MouseEvent.buttons()` bitfield into [`PointerButtons`].
