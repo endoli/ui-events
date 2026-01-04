@@ -11,10 +11,10 @@ use js_sys::{Array, Function, Reflect};
 use ui_events::keyboard::Modifiers;
 use ui_events::pointer::{
     PointerButton, PointerButtonEvent, PointerButtons, PointerEvent, PointerId, PointerInfo,
-    PointerState, PointerType, PointerUpdate,
+    PointerOrientation, PointerState, PointerType, PointerUpdate,
 };
 use ui_events::ScrollDelta;
-use web_sys::wasm_bindgen::JsCast;
+use web_sys::wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     Element, Event, MouseEvent, PointerEvent as WebPointerEvent, Touch, TouchEvent, TouchList,
     WheelEvent,
@@ -326,12 +326,62 @@ fn modifiers_from_pointer(e: &WebPointerEvent) -> Modifiers {
     m
 }
 
+fn orientation_from_pointer_event(e: &WebPointerEvent) -> PointerOrientation {
+    // Prefer Pointer Events Level 3 altitude/azimuth when present (radians).
+    let obj = e.as_ref();
+    if let (Ok(alt), Ok(azi)) = (
+        Reflect::get(obj, &JsValue::from_str("altitudeAngle")),
+        Reflect::get(obj, &JsValue::from_str("azimuthAngle")),
+    ) {
+        if let (Some(alt), Some(azi)) = (alt.as_f64(), azi.as_f64()) {
+            #[expect(
+                clippy::cast_possible_truncation,
+                reason = "DOM provides f64 radians; ui-events stores orientation as f32"
+            )]
+            return PointerOrientation {
+                altitude: alt as f32,
+                azimuth: azi as f32,
+            };
+        }
+    }
+
+    // Fall back to Pointer Events tiltX/tiltY (degrees).
+    // tiltX/tiltY are in [-90, 90]. Avoid tan() singularities at 90 degrees.
+    let tilt_x = (e.tilt_x() as f32).clamp(-89.9, 89.9);
+    let tilt_y = (e.tilt_y() as f32).clamp(-89.9, 89.9);
+    pointer_orientation_from_tilt_degrees(tilt_x, tilt_y)
+}
+
+fn pointer_orientation_from_tilt_degrees(tilt_x_deg: f32, tilt_y_deg: f32) -> PointerOrientation {
+    let tx = tilt_x_deg.to_radians();
+    let ty = tilt_y_deg.to_radians();
+    let x = tx.tan();
+    let y = ty.tan();
+
+    // Model the pen axis as the normalized vector (x, y, 1), where x/z = tan(tiltX),
+    // y/z = tan(tiltY). When perpendicular: (0,0,1).
+    let inv_norm = 1.0 / (x.mul_add(x, y * y) + 1.0).sqrt();
+    let z = inv_norm;
+
+    let altitude = z.asin();
+    let azimuth = if x == 0.0 && y == 0.0 {
+        core::f32::consts::FRAC_PI_2
+    } else {
+        y.atan2(x)
+    };
+
+    PointerOrientation { altitude, azimuth }
+}
+
 /// Build a [`PointerState`] from a DOM [`web_sys::PointerEvent`].
 ///
 /// - Coordinates use `clientX/Y` scaled by `scale_factor` to approximate
 ///   physical pixels.
-/// - Uses the event's reported `pressure`, `tangentialPressure`, and
-///   `width/height` where available.
+/// - Uses the event's reported `pressure`, `tangentialPressure`, `width/height`, and
+///   stylus orientation where available (preferring `altitudeAngle`/`azimuthAngle`,
+///   otherwise falling back to `tiltX`/`tiltY`).
+/// - Pointer Events `twist` is not currently mapped (there is no corresponding field in
+///   `ui-events`).
 pub fn state_from_pointer_event(e: &WebPointerEvent, scale_factor: f64) -> PointerState {
     let css_x = e.client_x() as f64;
     let css_y = e.client_y() as f64;
@@ -351,7 +401,7 @@ pub fn state_from_pointer_event(e: &WebPointerEvent, scale_factor: f64) -> Point
         modifiers: modifiers_from_pointer(e),
         count: e.detail().clamp(0, 255) as u8,
         contact_geometry: PhysicalSize { width, height },
-        orientation: Default::default(),
+        orientation: orientation_from_pointer_event(e),
         pressure,
         tangential_pressure,
         scale_factor,
@@ -807,5 +857,93 @@ mod touch_tests {
         assert_eq!(pointer_attach_count_from_active_touches(255), 255);
         assert_eq!(pointer_attach_count_from_active_touches(256), 255);
         assert_eq!(pointer_attach_count_from_active_touches(u32::MAX), 255);
+    }
+}
+
+#[cfg(test)]
+mod stylus_orientation_tests {
+    use super::*;
+
+    fn assert_approx(a: f32, b: f32, eps: f32) {
+        assert!((a - b).abs() <= eps, "expected {a} ~= {b} (eps={eps})");
+    }
+
+    fn angle_wrap_pi(mut a: f32) -> f32 {
+        // Wrap to (-pi, pi].
+        const TWO_PI: f32 = core::f32::consts::PI * 2.0;
+        a = (a + core::f32::consts::PI).rem_euclid(TWO_PI) - core::f32::consts::PI;
+        if a <= -core::f32::consts::PI {
+            a += TWO_PI;
+        }
+        a
+    }
+
+    fn assert_azimuth_approx(a: f32, b: f32, eps: f32) {
+        let da = angle_wrap_pi(a - b).abs();
+        assert!(
+            da <= eps,
+            "expected azimuth {a} ~= {b} (|Δ|={da}, eps={eps})"
+        );
+    }
+
+    #[test]
+    fn perpendicular_tilt_maps_to_perpendicular_altitude() {
+        let o = pointer_orientation_from_tilt_degrees(0.0, 0.0);
+        assert!((o.altitude - core::f32::consts::FRAC_PI_2).abs() < 1e-6);
+    }
+
+    #[test]
+    fn azimuth_matches_axes() {
+        // Positive X => azimuth ~ 0
+        let o = pointer_orientation_from_tilt_degrees(30.0, 0.0);
+        assert_azimuth_approx(o.azimuth, 0.0, 1e-6);
+
+        // Negative X => azimuth ~ pi
+        let o = pointer_orientation_from_tilt_degrees(-30.0, 0.0);
+        assert_azimuth_approx(o.azimuth, core::f32::consts::PI, 1e-6);
+
+        // Positive Y => azimuth ~ pi/2
+        let o = pointer_orientation_from_tilt_degrees(0.0, 30.0);
+        assert_azimuth_approx(o.azimuth, core::f32::consts::FRAC_PI_2, 1e-6);
+
+        // Negative Y => azimuth ~ -pi/2
+        let o = pointer_orientation_from_tilt_degrees(0.0, -30.0);
+        assert_azimuth_approx(o.azimuth, -core::f32::consts::FRAC_PI_2, 1e-6);
+    }
+
+    #[test]
+    fn increasing_tilt_reduces_altitude() {
+        let o0 = pointer_orientation_from_tilt_degrees(0.0, 0.0);
+        let o1 = pointer_orientation_from_tilt_degrees(30.0, 0.0);
+        let o2 = pointer_orientation_from_tilt_degrees(60.0, 0.0);
+        assert!(o1.altitude < o0.altitude);
+        assert!(o2.altitude < o1.altitude);
+    }
+
+    #[test]
+    fn symmetry_negating_tilt_flips_azimuth_by_pi() {
+        let o = pointer_orientation_from_tilt_degrees(25.0, -10.0);
+        let o_neg = pointer_orientation_from_tilt_degrees(-25.0, 10.0);
+
+        assert_approx(o.altitude, o_neg.altitude, 1e-6);
+        assert_azimuth_approx(o_neg.azimuth, o.azimuth + core::f32::consts::PI, 1e-6);
+    }
+
+    #[test]
+    fn near_ninety_degree_tilt_is_finite_and_near_parallel() {
+        let o = pointer_orientation_from_tilt_degrees(89.9, 0.0);
+        assert!(o.altitude.is_finite());
+        assert!(o.azimuth.is_finite());
+        assert!(o.altitude < 0.01);
+
+        let o = pointer_orientation_from_tilt_degrees(-89.9, 0.0);
+        assert!(o.altitude.is_finite());
+        assert!(o.azimuth.is_finite());
+        assert!(o.altitude < 0.01);
+
+        let o = pointer_orientation_from_tilt_degrees(0.0, 89.9);
+        assert!(o.altitude.is_finite());
+        assert!(o.azimuth.is_finite());
+        assert!(o.altitude < 0.01);
     }
 }

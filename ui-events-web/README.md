@@ -60,6 +60,12 @@ Pointer Events (mouse, touch, pen) and keyboard.
 - Coalesced and predicted move samples are opt‑in via `Options`.
 - Touch events (`touchstart`/`touchmove`/`touchend`/`touchcancel`) may correspond to multiple
   changed touches; use `pointer_events_from_dom_event` to receive all of them.
+- Stylus fields:
+  - `pressure`, `tangential_pressure`, `contact_geometry`, and `orientation` are populated
+    from Pointer Events data when available (preferring `altitudeAngle`/`azimuthAngle`,
+    otherwise falling back to `tiltX`/`tiltY`).
+  - Stylus rotation/twist (Pointer Events `twist`) is not currently exposed by `ui-events`,
+    so it is not mapped.
 - Keyboard: unknown `key`/`code` map to `Unidentified`; `is_composing` reflects the DOM flag.
 
 ## Example
