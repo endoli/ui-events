@@ -39,4 +39,10 @@ web-sys = { version = "0.3.82", default-features = false, features = [
 workspace = true
 
 [dev-dependencies]
-web-sys = { version = "0.3.82", features = ["Window", "Event", "KeyboardEvent"] }
+web-sys = { version = "0.3.82", features = [
+    "DomRect",
+    "Element",
+    "KeyboardEvent",
+    "PointerEvent",
+    "Window",
+] }
