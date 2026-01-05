@@ -34,6 +34,21 @@
 //!
 //! - Positions use `clientX` / `clientY` scaled by `Options::scale_factor`. Pass the
 //!   current device-pixel-ratio for physical pixels.
+//! - **Element-local coordinates (recipe):** DOM pointer coordinates are reported in viewport
+//!   space even when you register the listener on an element. For canvas/SVG apps you often
+//!   want coordinates relative to a specific element’s top-left corner. A common recipe is:
+//!
+//!   ```no_run
+//!   # use web_sys::{window, Element, PointerEvent};
+//!   # let (el, e): (Element, PointerEvent) = unimplemented!();
+//!   let rect = el.get_bounding_client_rect();
+//!   let dpr = window().unwrap().device_pixel_ratio();
+//!   let x = (e.client_x() as f64 - rect.left()) * dpr;
+//!   let y = (e.client_y() as f64 - rect.top()) * dpr;
+//!   ```
+//!
+//!   This does *not* undo arbitrary CSS transforms, and for SVG you may want a true transform
+//!   inversion (e.g. `getScreenCTM()`).
 //! - Coalesced and predicted move samples are opt‑in via `Options`.
 //! - Touch events (`touchstart`/`touchmove`/`touchend`/`touchcancel`) may correspond to multiple
 //!   changed touches; use `pointer_events_from_dom_event` to receive all of them.
