@@ -7,7 +7,7 @@ use ui_events::keyboard::{Code, Key, KeyState, KeyboardEvent, Location, Modifier
 use winit::keyboard::{KeyLocation, ModifiersState};
 
 extern crate alloc;
-use alloc::string::String;
+use alloc::string::ToString;
 
 /// Convert a [`winit::event::KeyEvent`] and [`winit::keyboard::ModifiersState`] to a [`KeyboardEvent`].
 pub fn from_winit_keyboard_event(
@@ -50,7 +50,7 @@ pub fn from_winit_modifier_state(modifiers_state: ModifiersState) -> Modifiers {
     if modifiers_state.shift_key() {
         modifiers.insert(Modifiers::SHIFT);
     }
-    if modifiers_state.super_key() {
+    if modifiers_state.meta_key() {
         modifiers.insert(Modifiers::META);
     }
     modifiers
@@ -64,7 +64,6 @@ pub fn from_winit_key(winit_key: winit::keyboard::Key) -> Key {
         WK::Character(c) => Key::Character(c.to_string()),
         WK::Unidentified(_) => Key::Named(NamedKey::Unidentified),
         WK::Dead(_) => Key::Named(NamedKey::Dead),
-        WK::Named(WNK::Space) => Key::Character(String::from(" ")),
         WK::Named(k) => Key::Named(match k {
             WNK::Alt => NamedKey::Alt,
             WNK::AltGraph => NamedKey::AltGraph,
@@ -77,11 +76,11 @@ pub fn from_winit_key(winit_key: winit::keyboard::Key) -> Key {
             WNK::Shift => NamedKey::Shift,
             WNK::Symbol => NamedKey::Symbol,
             WNK::SymbolLock => NamedKey::SymbolLock,
-            #[expect(deprecated, reason = "Deprecated but not unused.")]
-            WNK::Meta => NamedKey::Super,
+            WNK::Meta => NamedKey::Meta,
             #[expect(deprecated, reason = "Deprecated but not unused.")]
             WNK::Hyper => NamedKey::Hyper,
-            WNK::Super => NamedKey::Meta,
+            #[expect(deprecated, reason = "Deprecated but not unused.")]
+            WNK::Super => NamedKey::Super,
             WNK::Enter => NamedKey::Enter,
             WNK::Tab => NamedKey::Tab,
             WNK::ArrowDown => NamedKey::ArrowDown,
@@ -387,11 +386,6 @@ pub fn from_winit_code(physical_key: winit::keyboard::PhysicalKey) -> Code {
         PhysicalKey::Code(key_code) => match key_code {
             // Variants that don't match 1:1
             // With winit 0.31, these are renamed to swap the meta and super to match the W3C specs.
-            #[expect(deprecated, reason = "Deprecated but not unused.")]
-            KC::Meta => Code::Super,
-            KC::SuperLeft => Code::MetaLeft,
-            KC::SuperRight => Code::MetaRight,
-
             KC::Backquote => Code::Backquote,
             KC::Backslash => Code::Backslash,
             KC::BracketLeft => Code::BracketLeft,

@@ -24,6 +24,7 @@ pub mod pointer;
 
 extern crate alloc;
 use alloc::{vec, vec::Vec};
+use ui_events::dpi::PhysicalPosition;
 
 #[cfg(not(target_arch = "wasm32"))]
 extern crate std;
@@ -43,7 +44,7 @@ use ui_events::{
     ScrollDelta,
 };
 use winit::{
-    event::{ElementState, Force, MouseScrollDelta, Touch, TouchPhase, WindowEvent},
+    event::{ButtonSource, ElementState, Force, MouseScrollDelta, PointerSource, WindowEvent},
     keyboard::ModifiersState,
 };
 
@@ -110,28 +111,111 @@ impl WindowEventReducer {
             WindowEvent::KeyboardInput { event, .. } => Some(WindowEventTranslation::Keyboard(
                 keyboard::from_winit_keyboard_event(event.clone(), self.modifiers),
             )),
-            WindowEvent::CursorEntered { .. } => Some(WindowEventTranslation::Pointer(
+            WindowEvent::PointerEntered { .. } => Some(WindowEventTranslation::Pointer(
                 PointerEvent::Enter(PRIMARY_MOUSE),
             )),
-            WindowEvent::CursorLeft { .. } => Some(WindowEventTranslation::Pointer(
+            WindowEvent::PointerLeft { .. } => Some(WindowEventTranslation::Pointer(
                 PointerEvent::Leave(PRIMARY_MOUSE),
             )),
-            WindowEvent::CursorMoved { position, .. } => {
-                self.primary_state.position = *position;
+            WindowEvent::PointerMoved {
+                position,
+                source: PointerSource::Mouse,
+                ..
+            } => {
+                self.primary_state.position = PhysicalPosition::new(position.x, position.y);
+
+                let info = PRIMARY_MOUSE;
 
                 Some(WindowEventTranslation::Pointer(self.counter.attach_count(
                     scale_factor,
                     PointerEvent::Move(PointerUpdate {
-                        pointer: PRIMARY_MOUSE,
+                        pointer: info,
                         current: self.primary_state.clone(),
                         coalesced: vec![],
                         predicted: vec![],
                     }),
                 )))
             }
-            WindowEvent::MouseInput {
+
+            WindowEvent::PointerMoved {
+                position,
+                source: PointerSource::Touch { finger_id, force },
+                ..
+            } => {
+                self.primary_state.position = PhysicalPosition::new(position.x, position.y);
+
+                self.primary_state.pressure = {
+                    match force {
+                        Some(Force::Calibrated { force, .. }) => (force * 0.5) as f32,
+                        Some(Force::Normalized(q)) => *q as f32,
+                        _ => 0.5,
+                    }
+                };
+
+                let info = PointerInfo {
+                    pointer_id: PointerId::new(finger_id.into_raw() as u64),
+                    // TODO: Maybe transmute device.
+                    persistent_device_id: None,
+                    pointer_type: PointerType::Touch,
+                };
+
+                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                    scale_factor,
+                    PointerEvent::Move(PointerUpdate {
+                        pointer: info,
+                        current: self.primary_state.clone(),
+                        coalesced: vec![],
+                        predicted: vec![],
+                    }),
+                )))
+            }
+
+            WindowEvent::PointerButton {
+                state,
+                button: ButtonSource::Touch { finger_id, force },
+                position,
+                ..
+            } => {
+                let info = PointerInfo {
+                    pointer_id: PointerId::new(finger_id.into_raw() as u64),
+                    // TODO: Maybe transmute device.
+                    persistent_device_id: None,
+                    pointer_type: PointerType::Touch,
+                };
+
+                let pointer_state = PointerState {
+                    time,
+                    position: PhysicalPosition::new(position.x, position.y),
+                    modifiers: self.primary_state.modifiers,
+                    pressure: {
+                        match force {
+                            Some(Force::Calibrated { force, .. }) => (force * 0.5) as f32,
+                            Some(Force::Normalized(q)) => *q as f32,
+                            _ => 0.5,
+                        }
+                    },
+                    ..Default::default()
+                };
+
+                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
+                    scale_factor,
+                    match state {
+                        ElementState::Pressed => PointerEvent::Down(PointerButtonEvent {
+                            pointer: info,
+                            button: None,
+                            state: pointer_state,
+                        }),
+                        ElementState::Released => PointerEvent::Up(PointerButtonEvent {
+                            pointer: info,
+                            button: None,
+                            state: pointer_state,
+                        }),
+                    },
+                )))
+            }
+            WindowEvent::PointerButton {
                 state: ElementState::Pressed,
-                button,
+                button: ButtonSource::Mouse(button),
                 ..
             } => {
                 let button = pointer::try_from_winit_button(*button);
@@ -148,9 +232,9 @@ impl WindowEventReducer {
                     }),
                 )))
             }
-            WindowEvent::MouseInput {
+            WindowEvent::PointerButton {
                 state: ElementState::Released,
-                button,
+                button: ButtonSource::Mouse(button),
                 ..
             } => {
                 let button = pointer::try_from_winit_button(*button);
@@ -172,7 +256,9 @@ impl WindowEventReducer {
                     pointer: PRIMARY_MOUSE,
                     delta: match *delta {
                         MouseScrollDelta::LineDelta(x, y) => ScrollDelta::LineDelta(x, y),
-                        MouseScrollDelta::PixelDelta(p) => ScrollDelta::PixelDelta(p),
+                        MouseScrollDelta::PixelDelta(p) => {
+                            ScrollDelta::PixelDelta(PhysicalPosition::new(p.x, p.y))
+                        }
                     },
                     state: self.primary_state.clone(),
                 }),
@@ -193,60 +279,6 @@ impl WindowEventReducer {
                         // Winit gives this in counterclockwise degrees.
                         gesture: PointerGesture::Rotate((-*delta).to_radians()),
                         state: self.primary_state.clone(),
-                    },
-                )))
-            }
-            WindowEvent::Touch(Touch {
-                phase,
-                id,
-                location,
-                force,
-                ..
-            }) => {
-                let pointer = PointerInfo {
-                    pointer_id: PointerId::new(id.saturating_add(1)),
-                    pointer_type: PointerType::Touch,
-                    persistent_device_id: None,
-                };
-
-                use TouchPhase::*;
-
-                let state = PointerState {
-                    time,
-                    position: *location,
-                    modifiers: self.primary_state.modifiers,
-                    pressure: if matches!(phase, Ended | Cancelled) {
-                        0.0
-                    } else {
-                        match force {
-                            Some(Force::Calibrated { force, .. }) => (force * 0.5) as f32,
-                            Some(Force::Normalized(q)) => *q as f32,
-                            _ => 0.5,
-                        }
-                    },
-                    ..Default::default()
-                };
-
-                Some(WindowEventTranslation::Pointer(self.counter.attach_count(
-                    scale_factor,
-                    match phase {
-                        Started => PointerEvent::Down(PointerButtonEvent {
-                            pointer,
-                            button: None,
-                            state,
-                        }),
-                        Moved => PointerEvent::Move(PointerUpdate {
-                            pointer,
-                            current: state,
-                            coalesced: vec![],
-                            predicted: vec![],
-                        }),
-                        Cancelled => PointerEvent::Cancel(pointer),
-                        Ended => PointerEvent::Up(PointerButtonEvent {
-                            pointer,
-                            button: None,
-                            state,
-                        }),
                     },
                 )))
             }
