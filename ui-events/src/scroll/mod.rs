@@ -24,3 +24,129 @@ pub enum ScrollDelta {
     /// Pixel delta.
     PixelDelta(PhysicalPosition<f64>),
 }
+
+impl ScrollDelta {
+    /// Convert this scroll delta into a pixel delta using caller-provided scaling.
+    ///
+    /// This is a policy hook: the caller chooses what a "line" or "page" means in pixels.
+    ///
+    /// ## Example (physical pixel policy)
+    ///
+    /// Convert line deltas into a pixel delta by choosing a line size in physical pixels:
+    ///
+    /// ```
+    /// use dpi::PhysicalPosition;
+    /// use ui_events::ScrollDelta;
+    ///
+    /// let delta = ScrollDelta::LineDelta(0.0, -3.0);
+    ///
+    /// // Policy: 1 line = 40 physical px vertically.
+    /// let line_px = PhysicalPosition { x: 0.0, y: 40.0 };
+    /// // Policy: 1 page = 800 physical px vertically (e.g. viewport height).
+    /// let page_px = PhysicalPosition { x: 0.0, y: 800.0 };
+    ///
+    /// let px = delta.to_pixel_delta(line_px, page_px);
+    /// assert_eq!(px, PhysicalPosition { x: 0.0, y: -120.0 });
+    /// ```
+    ///
+    /// ## Scale factor and logical units
+    ///
+    /// If your policy is expressed in logical/CSS pixels, apply your scale factor
+    /// (device pixel ratio) before calling `to_pixel_delta`:
+    ///
+    /// ```no_run
+    /// use dpi::PhysicalPosition;
+    /// use ui_events::ScrollDelta;
+    ///
+    /// let delta = ScrollDelta::LineDelta(0.0, 1.0);
+    /// let dpr = 2.0; // from your platform/window
+    ///
+    /// // Policy: 1 line = 16 CSS px vertically.
+    /// let line_px = PhysicalPosition { x: 0.0, y: 16.0 * dpr };
+    /// // Policy: 1 page = 800 physical px vertically.
+    /// let page_px = PhysicalPosition { x: 0.0, y: 800.0 };
+    ///
+    /// let _px = delta.to_pixel_delta(line_px, page_px);
+    /// ```
+    ///
+    /// - [`ScrollDelta::PixelDelta`] is returned unchanged.
+    /// - [`ScrollDelta::LineDelta`] is multiplied by `line_px` per axis.
+    /// - [`ScrollDelta::PageDelta`] is multiplied by `page_px` per axis.
+    #[inline]
+    pub fn to_pixel_delta(
+        self,
+        line_px: PhysicalPosition<f64>,
+        page_px: PhysicalPosition<f64>,
+    ) -> PhysicalPosition<f64> {
+        match self {
+            Self::PixelDelta(p) => p,
+            Self::LineDelta(x, y) => PhysicalPosition {
+                x: f64::from(x) * line_px.x,
+                y: f64::from(y) * line_px.y,
+            },
+            Self::PageDelta(x, y) => PhysicalPosition {
+                x: f64::from(x) * page_px.x,
+                y: f64::from(y) * page_px.y,
+            },
+        }
+    }
+
+    /// Convert this scroll delta into [`ScrollDelta::PixelDelta`] using caller-provided scaling.
+    #[inline]
+    pub fn into_pixel_delta(
+        self,
+        line_px: PhysicalPosition<f64>,
+        page_px: PhysicalPosition<f64>,
+    ) -> Self {
+        Self::PixelDelta(self.to_pixel_delta(line_px, page_px))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pixel_passthrough() {
+        let p = PhysicalPosition { x: 1.0, y: -2.0 };
+        assert_eq!(
+            ScrollDelta::PixelDelta(p).to_pixel_delta(
+                PhysicalPosition { x: 10.0, y: 10.0 },
+                PhysicalPosition { x: 100.0, y: 100.0 },
+            ),
+            p
+        );
+    }
+
+    #[test]
+    fn line_delta_scales_per_axis() {
+        let line_px = PhysicalPosition { x: 2.0, y: 10.0 };
+        let page_px = PhysicalPosition { x: 100.0, y: 100.0 };
+        assert_eq!(
+            ScrollDelta::LineDelta(3.0, -1.0).to_pixel_delta(line_px, page_px),
+            PhysicalPosition { x: 6.0, y: -10.0 }
+        );
+    }
+
+    #[test]
+    fn page_delta_scales_per_axis() {
+        let line_px = PhysicalPosition { x: 10.0, y: 10.0 };
+        let page_px = PhysicalPosition { x: 4.0, y: 20.0 };
+        assert_eq!(
+            ScrollDelta::PageDelta(0.5, -2.0).to_pixel_delta(line_px, page_px),
+            PhysicalPosition { x: 2.0, y: -40.0 }
+        );
+    }
+
+    #[test]
+    fn into_pixel_delta_wraps() {
+        let out = ScrollDelta::LineDelta(1.0, 1.0).into_pixel_delta(
+            PhysicalPosition { x: 5.0, y: 6.0 },
+            PhysicalPosition { x: 100.0, y: 100.0 },
+        );
+        assert_eq!(
+            out,
+            ScrollDelta::PixelDelta(PhysicalPosition { x: 5.0, y: 6.0 })
+        );
+    }
+}
