@@ -18,6 +18,7 @@ This release has an [MSRV][] of 1.82.
 ### Added
 
 * `PointerId::get_inner()` method to access the inner `NonZeroU64` value.
+* `ScrollDelta::{to_pixel_delta, into_pixel_delta}` helpers for converting line/page scroll deltas into pixels using caller-provided scaling.
 
 ## [0.2.0][] - 2025-10-28
 
