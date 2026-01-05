@@ -303,13 +303,18 @@ pub struct PointerScrollEvent {
 /// A touchpad gesture for pointer.
 #[derive(Clone, Debug)]
 pub enum PointerGesture {
-    /// Pinch factor.
+    /// Pinch delta.
     ///
-    /// This is a signed quantity as a fraction of the current scale,
-    /// to derive a new scale you might use `1. + x * s` where `s`
-    /// is your current scale, and `x` is this factor.
+    /// This is a signed quantity as a fraction of the current scale.
+    ///
+    /// For example, `0.1` means “increase scale by 10%”, and `-0.1` means
+    /// “decrease scale by 10%”.
+    ///
+    /// A common update rule is `new_scale = current_scale * (1.0 + delta)`.
     Pinch(f32),
     /// Clockwise rotation in radians.
+    ///
+    /// This is a delta for this update, not an absolute angle.
     Rotate(f32),
 }
 
