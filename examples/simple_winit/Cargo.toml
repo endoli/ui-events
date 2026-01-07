@@ -1,0 +1,19 @@
+[package]
+name = "simple_winit"
+version.workspace = true
+edition.workspace = true
+rust-version = "1.86"
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+anyhow = "1.0.98"
+pollster = "0.4.0"
+ui-events = { workspace = true }
+ui-events-winit = { path = "../../ui-events-winit" }
+vello = "0.6.0"
+winit = "0.30.10"
+
+[lints]
+workspace = true

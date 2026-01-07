@@ -8,6 +8,7 @@ members = [
     "ui-theme",
     "examples/simple",
     "examples/simple_web",
+    "examples/simple_winit",
 ]
 
 [workspace.package]
