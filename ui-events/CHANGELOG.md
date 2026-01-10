@@ -13,12 +13,16 @@ You can find its changes [documented below](#020-2025-10-28).
 
 ## [Unreleased]
 
-This release has an [MSRV][] of 1.82.
+This release has an [MSRV][] of 1.85.
 
 ### Added
 
 * `PointerId::get_inner()` method to access the inner `NonZeroU64` value.
 * `ScrollDelta::{to_pixel_delta, into_pixel_delta}` helpers for converting line/page scroll deltas into pixels using caller-provided scaling.
+
+### Changed
+
+* Updated Kurbo to [v0.13.0](https://github.com/linebender/kurbo/releases/tag/v0.13.0).
 
 ## [0.2.0][] - 2025-10-28
 
