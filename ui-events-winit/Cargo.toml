@@ -21,7 +21,11 @@ std = []
 
 [dependencies]
 ui-events = { workspace = true, features = ["std"] }
-winit = "0.30.10"
+winit = { version = "0.30.10", default-features = false, features = [
+    "x11",
+    "wayland",
+    "wayland-dlopen",
+] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-time.workspace = true
