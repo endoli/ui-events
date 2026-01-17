@@ -17,8 +17,8 @@ targets = []
 
 [features]
 default = ["std"]
-std = ["dpi/std", "keyboard-types/std", "kurbo/std"]
-libm = ["kurbo/libm"]
+std = ["dpi/std", "keyboard-types/std", "kurbo?/std"]
+libm = ["kurbo?/libm"]
 kurbo = ["dep:kurbo"]
 
 [dependencies]
