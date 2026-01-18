@@ -35,12 +35,12 @@ pub use std::time::Instant;
 pub use web_time::Instant;
 
 use ui_events::{
+    ScrollDelta,
     keyboard::KeyboardEvent,
     pointer::{
         PointerButtonEvent, PointerEvent, PointerGesture, PointerGestureEvent, PointerId,
         PointerInfo, PointerScrollEvent, PointerState, PointerType, PointerUpdate,
     },
-    ScrollDelta,
 };
 use winit::{
     event::{ElementState, Force, MouseScrollDelta, Touch, TouchPhase, WindowEvent},

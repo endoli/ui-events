@@ -15,7 +15,7 @@ use std::collections::{BTreeSet, VecDeque};
 use std::rc::Rc;
 
 use ui_events_web::pointer::Options as PtrOptions;
-use web_sys::wasm_bindgen::{closure::Closure, prelude::*, JsCast, JsValue};
+use web_sys::wasm_bindgen::{JsCast, JsValue, closure::Closure, prelude::*};
 use web_sys::{
     CanvasRenderingContext2d, Document, Event, EventTarget, HtmlCanvasElement, HtmlElement,
     HtmlInputElement, KeyboardEvent, Window,
