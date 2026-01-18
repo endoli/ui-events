@@ -13,7 +13,7 @@ env:
   RUST_MIN_NO_STD_VER: "1.85"
   # List of packages that will be checked with the minimum supported Rust version.
   # This should be limited to packages that are intended for publishing.
-  RUST_MIN_VER_PKGS: "-p ui-events -p ui-events-winit -p ui-input-state -p ui-theme"
+  RUST_MIN_VER_PKGS: "-p ui-events -p ui-events-web -p ui-events-winit -p ui-input-state -p ui-theme"
   # List of packages that will be checked for `no_std` builds.
   # This should be limited to packages that are intended for publishing.
   RUST_NO_STD_PKGS: "-p ui-events -p ui-input-state -p ui-theme"
