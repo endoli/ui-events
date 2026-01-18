@@ -108,6 +108,9 @@ jobs:
         # supports being placed at the top level, which we want to avoid cluttering.
         run: cargo rdme --workspace-project=ui-events --heading-base-level=0 --check
 
+      - name: cargo rdme (ui-events-web)
+        run: cargo rdme --workspace-project=ui-events-web --heading-base-level=0 --check
+
       - name: cargo rdme (ui-events-winit)
         run: cargo rdme --workspace-project=ui-events-winit --heading-base-level=0 --check
 
