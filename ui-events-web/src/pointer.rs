@@ -8,12 +8,12 @@ use alloc::vec::Vec;
 
 use dpi::{PhysicalPosition, PhysicalSize};
 use js_sys::{Array, Function, Reflect};
+use ui_events::ScrollDelta;
 use ui_events::keyboard::Modifiers;
 use ui_events::pointer::{
     PointerButton, PointerButtonEvent, PointerButtons, PointerEvent, PointerId, PointerInfo,
     PointerOrientation, PointerState, PointerType, PointerUpdate,
 };
-use ui_events::ScrollDelta;
 use web_sys::wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     Element, Event, MouseEvent, PointerEvent as WebPointerEvent, Touch, TouchEvent, TouchList,
@@ -706,11 +706,7 @@ fn state_from_touch(
 
     let pressure = {
         let f = touch.force();
-        if f > 0.0 {
-            f
-        } else {
-            0.5
-        }
+        if f > 0.0 { f } else { 0.5 }
     };
 
     PointerState {
