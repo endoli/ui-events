@@ -8,12 +8,24 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 # Changelog
 
-The latest published UI Events Winit release is [0.2.0](#020-2025-10-28) which was released on 2025-10-28.
-You can find its changes [documented below](#020-2025-10-28).
+The latest published UI Events Winit release is [0.3.0](#030-2026-01-18) which was released on 2026-01-18.
+You can find its changes [documented below](#030-2026-01-18).
 
 ## [Unreleased]
 
 This release has an [MSRV][] of 1.85.
+
+## [0.3.0][] - 2026-01-18
+
+This release has an [MSRV][] of 1.85.
+
+### Fixed
+
+* Replaced stale tap state for `pointer_id`. ([#92][] by [@xorgy][])
+
+### Changed
+
+* Bumped the MSRV to 1.85. ([#107][] by [@waywardmonkeys][])
 
 ## [0.2.0][] - 2025-10-28
 
@@ -38,15 +50,19 @@ This is the initial release.
 
 [@arthur-fontaine]: https://github.com/arthur-fontaine
 [@nicoburns]: https://github.com/nicoburns
+[@waywardmonkeys]: https://github.com/waywardmonkeys
 [@xorgy]: https://github.com/xorgy
 
 [#61]: https://github.com/endoli/ui-events/pull/61
 [#63]: https://github.com/endoli/ui-events/pull/63
 [#78]: https://github.com/endoli/ui-events/pull/78
 [#80]: https://github.com/endoli/ui-events/pull/80
+[#92]: https://github.com/endoli/ui-events/pull/92
+[#107]: https://github.com/endoli/ui-events/pull/107
 
-[Unreleased]: https://github.com/endoli/ui-events/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/endoli/ui-events/compare/v0.3.0...HEAD
 [0.1.0]: https://github.com/endoli/ui-events/releases/tag/v0.1.0
 [0.2.0]: https://github.com/endoli/ui-events/releases/tag/v0.2.0
+[0.3.0]: https://github.com/endoli/ui-events/releases/tag/v0.3.0
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
