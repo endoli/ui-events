@@ -15,7 +15,7 @@ members = [
 #
 # NOTE: When bumping this, remember to also bump the aforementioned other packages'
 #       version in the dependencies section at the bottom of this file.
-version = "0.2.0"
+version = "0.3.0"
 
 edition = "2024"
 # Keep in sync with RUST_MIN_VER in .github/workflows/ci.yml, with the relevant README.md files
@@ -74,6 +74,6 @@ clippy.wildcard_dependencies = "warn"
 
 [workspace.dependencies]
 dpi = { version = "0.1.2", default-features = false }
-ui-events = { version = "0.2.0", path = "ui-events", default-features = false }
-ui-events-web = { version = "0.2.0", path = "ui-events-web" }
+ui-events = { version = "0.3.0", path = "ui-events", default-features = false }
+ui-events-web = { version = "0.3.0", path = "ui-events-web" }
 web-time = "1.1.0"

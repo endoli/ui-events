@@ -1056,7 +1056,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "simple"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "ui-events",
@@ -1064,7 +1064,7 @@ dependencies = [
 
 [[package]]
 name = "simple_web"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ui-events",
  "ui-events-web",
@@ -1234,7 +1234,7 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "ui-events"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "dpi",
  "keyboard-types",
@@ -1243,7 +1243,7 @@ dependencies = [
 
 [[package]]
 name = "ui-events-web"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "dpi",
  "js-sys",
@@ -1253,7 +1253,7 @@ dependencies = [
 
 [[package]]
 name = "ui-events-winit"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ui-events",
  "web-time",
@@ -1262,7 +1262,7 @@ dependencies = [
 
 [[package]]
 name = "ui-input-state"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "dpi",
  "ui-events",
@@ -1270,7 +1270,7 @@ dependencies = [
 
 [[package]]
 name = "ui-theme"
-version = "0.2.0"
+version = "0.3.0"
 
 [[package]]
 name = "unicode-ident"

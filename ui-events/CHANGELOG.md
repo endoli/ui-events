@@ -8,8 +8,8 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 # Changelog
 
-The latest published UI Events release is [0.2.0](#020-2025-10-28) which was released on 2025-10-28.
-You can find its changes [documented below](#020-2025-10-28).
+The latest published UI Events release is [0.3.0](#030-2026-01-18) which was released on 2026-01-18.
+You can find its changes [documented below](#030-2026-01-18).
 
 ## [Unreleased]
 
@@ -17,12 +17,23 @@ This release has an [MSRV][] of 1.85.
 
 ### Added
 
-* `PointerId::get_inner()` method to access the inner `NonZeroU64` value.
-* `ScrollDelta::{to_pixel_delta, into_pixel_delta}` helpers for converting line/page scroll deltas into pixels using caller-provided scaling.
+### Changed
+
+## [0.3.0][] - 2026-01-18
+
+This release has an [MSRV][] of 1.85.
+
+### Added
+
+* `PointerId::get_inner()` method to access the inner `NonZeroU64` value. ([#90][] by [@jrmoulton][])
+* `ScrollDelta::{to_pixel_delta, into_pixel_delta}` helpers for converting line/page scroll deltas into pixels using caller-provided scaling. ([#101][] by [@waywardmonkeys][])
 
 ### Changed
 
-* Updated Kurbo to [v0.13.0](https://github.com/linebender/kurbo/releases/tag/v0.13.0).
+* Clarified the semantics of gesture deltas. ([#100][] by [@waywardmonkeys][])
+* Updated Kurbo to [v0.13.0](https://github.com/linebender/kurbo/releases/tag/v0.13.0). ([#105][] by [@AustinMReppert][])
+* The `std` and `libm` features no longer enable the optional `kurbo` dependency; enable the `kurbo` feature explicitly if you want the dependency. ([#104][] by [@waywardmonkeys][])
+* Bumped the MSRV to 1.85. ([#107][] by [@waywardmonkeys][])
 
 ## [0.2.0][] - 2025-10-28
 
@@ -47,6 +58,7 @@ This is the initial release.
 
 
 [@arthur-fontaine]: https://github.com/arthur-fontaine
+[@AustinMReppert]: https://github.com/AustinMReppert
 [@jrmoulton]: https://github.com/jrmoulton
 [@nicoburns]: https://github.com/nicoburns
 [@waywardmonkeys]: https://github.com/waywardmonkeys
@@ -56,9 +68,16 @@ This is the initial release.
 [#63]: https://github.com/endoli/ui-events/pull/63
 [#80]: https://github.com/endoli/ui-events/pull/80
 [#82]: https://github.com/endoli/ui-events/pull/82
+[#90]: https://github.com/endoli/ui-events/pull/90
+[#100]: https://github.com/endoli/ui-events/pull/100
+[#101]: https://github.com/endoli/ui-events/pull/101
+[#104]: https://github.com/endoli/ui-events/pull/104
+[#105]: https://github.com/endoli/ui-events/pull/105
+[#107]: https://github.com/endoli/ui-events/pull/107
 
-[Unreleased]: https://github.com/endoli/ui-events/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/endoli/ui-events/compare/v0.3.0...HEAD
 [0.1.0]: https://github.com/endoli/ui-events/releases/tag/v0.1.0
 [0.2.0]: https://github.com/endoli/ui-events/releases/tag/v0.2.0
+[0.3.0]: https://github.com/endoli/ui-events/releases/tag/v0.3.0
 
 [MSRV]: README.md#minimum-supported-rust-version-msrv
